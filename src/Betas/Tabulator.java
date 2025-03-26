@@ -1,3 +1,5 @@
+package Betas;
+
 import java.util.Stack;
 
 public class Tabulator {
