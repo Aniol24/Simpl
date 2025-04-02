@@ -3,17 +3,14 @@ package Utils;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class analitzadorGramatica {
 
     static class Rule {
         String name;
         List<List<String>> tokens;
-
-        Rule(String name) {
-            this.name = name;
-            this.tokens = new ArrayList<>();
-        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -51,26 +48,41 @@ public class analitzadorGramatica {
             changed = false;
             for (Rule rule : rules) {
                 Set<String> firstSet = first.get(rule.name);
-                for (List<String> prod : rule.tokens) {
-                    boolean epsilonInAll = true;
-                    for (String symbol : prod) {
+
+                for (List<String> production : rule.tokens) {
+                    boolean nullable = true;
+                    for (String symbol : production) {
+                        Set<String> symbolFirst;
+
                         if (symbol.equals("EPSILON")) {
-                            if (firstSet.add("EPSILON")) changed = true;
+                            nullable = true;
+                            if (firstSet.add("EPSILON"))
+                                changed = true;
                             break;
                         }
-                        Set<String> symbolFirst = first.getOrDefault(symbol, Set.of(symbol));
+
+                        if (nonTerminals.contains(symbol)) {
+                            symbolFirst = first.get(symbol);
+                        } else {
+                            symbolFirst = new HashSet<>();
+                            symbolFirst.add(symbol); // terminal
+                        }
+
+                        // Añadir todos excepto EPSILON
                         for (String tok : symbolFirst) {
-                            if (!tok.equals("EPSILON")) {
-                                if (firstSet.add(tok)) changed = true;
+                            if (!tok.equals("EPSILON") && firstSet.add(tok)) {
+                                changed = true;
                             }
                         }
+
                         if (!symbolFirst.contains("EPSILON")) {
-                            epsilonInAll = false;
-                            break;
+                            nullable = false;
+                            break; // no es nullable, se detiene la iteración de esta producción
                         }
                     }
-                    if (epsilonInAll) {
-                        if (firstSet.add("EPSILON")) changed = true;
+                    if (nullable) {
+                        if (firstSet.add("EPSILON"))
+                            changed = true;
                     }
                 }
             }
@@ -78,6 +90,7 @@ public class analitzadorGramatica {
 
         // FOLLOW
         follow.get("START").add("EOF");
+
         do {
             changed = false;
             for (Rule rule : rules) {
@@ -87,28 +100,40 @@ public class analitzadorGramatica {
                         if (nonTerminals.contains(B)) {
                             Set<String> followB = follow.get(B);
                             Set<String> trailer = new HashSet<>();
+
                             boolean epsilonInTrailer = true;
                             for (int j = i + 1; j < prod.size(); j++) {
                                 String beta = prod.get(j);
-                                Set<String> firstBeta = first.getOrDefault(beta, Set.of(beta));
+                                Set<String> firstBeta;
+
+                                if (nonTerminals.contains(beta)) {
+                                    firstBeta = new HashSet<>(first.get(beta));
+                                } else {
+                                    firstBeta = new HashSet<>();
+                                    firstBeta.add(beta);
+                                }
+
                                 trailer.addAll(firstBeta);
                                 if (!firstBeta.contains("EPSILON")) {
                                     epsilonInTrailer = false;
                                     break;
                                 }
                             }
+
                             if (i + 1 == prod.size() || epsilonInTrailer) {
                                 trailer.addAll(follow.get(rule.name));
                             }
+
                             trailer.remove("EPSILON");
-                            if (followB.addAll(trailer)) changed = true;
+                            if (followB.addAll(trailer))
+                                changed = true;
                         }
                     }
                 }
             }
         } while (changed);
 
-        // Guardar resultats
+        // Guardar resultados
         saveAsJson("tokens.json", allTokens);
         saveAsJson("terminals_and_nonterminals.json", Map.of(
                 "terminals", terminals,
@@ -122,39 +147,16 @@ public class analitzadorGramatica {
         System.out.println("✅ JSONS Generats");
     }
 
+    // Método modificado para leer el JSON correctamente usando Gson
     static List<Rule> readGrammar(String path) throws IOException {
-        String content = Files.readString(Paths.get(path));
-        List<Rule> rules = new ArrayList<>();
-
-        content = content.replaceAll("\\s+", "");
-        content = content.substring(1, content.length() - 1); // remove outer []
-
-        String[] ruleParts = content.split("},\\{");
-        for (String rawRule : ruleParts) {
-            rawRule = rawRule.replaceAll("[\\[\\]{}\"]", "");
-            String[] parts = rawRule.split("name:|tokens:");
-            String name = parts[1].split(",")[0];
-            Rule rule = new Rule(name);
-
-            String tokenData = rawRule.substring(rawRule.indexOf("tokens:") + 7);
-            if (!tokenData.isEmpty()) {
-                for (String group : tokenData.split("],")) {
-                    group = group.replace("[", "").replace("]", "").replace("tokens:", "").replace("\"", "");
-                    if (group.isEmpty()) continue;
-                    List<String> tokens = new ArrayList<>(List.of(group.split(",")));
-                    tokens.replaceAll(String::trim);
-                    rule.tokens.add(tokens);
-                }
-            }
-
-            rules.add(rule);
+        Gson gson = new Gson();
+        try (Reader reader = new FileReader(path)) {
+            return gson.fromJson(reader, new TypeToken<List<Rule>>(){}.getType());
         }
-
-        return rules;
     }
 
     static void saveAsJson(String fileName, Object data) throws IOException {
-        FileWriter writer = new FileWriter("src/JSON Files/"+fileName);
+        FileWriter writer = new FileWriter("src/JSON Files/" + fileName);
         writer.write(toJson(data));
         writer.close();
     }
@@ -172,7 +174,8 @@ public class analitzadorGramatica {
         StringBuilder sb = new StringBuilder("[");
         boolean first = true;
         for (Object item : set) {
-            if (!first) sb.append(",");
+            if (!first)
+                sb.append(",");
             sb.append("\"").append(item).append("\"");
             first = false;
         }
@@ -184,7 +187,8 @@ public class analitzadorGramatica {
         StringBuilder sb = new StringBuilder("{\n");
         boolean first = true;
         for (Map.Entry<?, ?> entry : map.entrySet()) {
-            if (!first) sb.append(",\n");
+            if (!first)
+                sb.append(",\n");
             sb.append("\"").append(entry.getKey()).append("\": ");
             Object value = entry.getValue();
             if (value instanceof Set<?> s) {
