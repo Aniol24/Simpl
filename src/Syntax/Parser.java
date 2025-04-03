@@ -1,8 +1,12 @@
-package Parser;
+package Syntax;
 
 import java.util.*;
+import Lexicon.Scanner;
 
 public class Parser {
+
+    // Aquí aniria el Scanner
+    private Scanner scanner;
 
     private final Map<String, Map<String, List<String>>> parsingTable;
     private final Stack<String> stack = new Stack<>();
@@ -18,6 +22,27 @@ public class Parser {
         parse();
     }
 
+    public Parser(Scanner scanner) {
+        ParsingTable pt = new ParsingTable();
+        this.scanner = scanner;
+
+        this.parsingTable = pt.getParsingTable();
+        this.inputTokens = new ArrayList<>();
+        this.inputTokens.add("EOF");
+    }
+
+    public void newParse() throws Exception {
+        String token;
+        while (!(token = scanner.nextToken()).equals("EOF")) {
+            System.out.print(token + " ");
+
+            if (token.equals("EOL") || token.equals("START") || token.equals("END")) {
+                System.out.println();
+            }
+        }
+        System.out.println("EOF");
+    }
+
     private void parse() {
 
         stack.push("START");
@@ -26,7 +51,7 @@ public class Parser {
 
         while (!stack.isEmpty()) {
             String top = stack.peek();
-            String currentToken = inputTokens.get(currentIndex);
+            String currentToken = inputTokens.get(currentIndex); // Aquí canviar per a nextToken() del Scanner
 
             if (top.equals(currentToken)) {
                 stack.pop();

@@ -1,23 +1,35 @@
-import Parser.Parser;
-import Parser.ParsingTable;
+import Preprocessor.Preprocessor;
+import Syntax.Parser;
+import Lexicon.Scanner;
 
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
-        /*if (args.length != 1) {
-            System.err.println("Usage: java Main <path-to-grammar-file>");
-            System.exit(1);
-        }
-         */
-        List<String> tokens = List.of(
-                "FN", "MAIN", "START",
-                "INT", "ARROW", "ID", "EQ","INTEGER_LITERAL", "EOL",
-                "RETURN", "EOL",
-                "END"
-        );
 
-        Parser parser = new Parser(tokens);
+        Path codePath = Paths.get("src/Code/code.smpl");
+
+        String codeContent = "";
+
+        try {
+            codeContent = Files.readString(codePath);
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+            return;
+        }
+
+        String pureCode = Preprocessor.removeComments(codeContent);
+
+        Scanner scanner = new Scanner(pureCode);
+        Parser parser = new Parser(scanner);
+
+        try {
+            parser.newParse();
+        } catch (Exception e) {
+            System.err.println("Error parsing the code: " + e.getMessage());
+        }
     }
 }
