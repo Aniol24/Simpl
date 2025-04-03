@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 public class Main {
     public static void main(String[] args) {
 
-        Path codePath = Paths.get("src/Code/code.smpl");
+        Path codePath = Paths.get("src/Code/test.smpl");
 
         String codeContent = "";
 
@@ -26,8 +26,9 @@ public class Main {
         Scanner scanner = new Scanner(pureCode);
         Parser parser = new Parser(scanner);
 
+
         try {
-            parser.newParse();
+            parser.parse();
         } catch (Exception e) {
             System.err.println("Error parsing the code: " + e.getMessage());
         }

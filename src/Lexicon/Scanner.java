@@ -6,42 +6,48 @@ public class Scanner {
     private int currentLine;
     private int currentPosition;
     private int currentIndent;
+    private boolean expectFunctionName; // Indica que el próximo identificador es el nombre de una función
 
-    public Scanner (String code) {
+    public Scanner(String code) {
         this.lines = code.split("\n");
         this.currentLine = 1;
         this.currentPosition = 0;
         this.currentIndent = 0;
+        this.expectFunctionName = false;
     }
 
     public String nextToken() throws Exception {
-        // Retornem END tokens pendents si n'hi ha
+        // Si ya se han procesado todas las líneas pero quedan bloques abiertos,
+        // devolvemos los tokens "END" pendientes.
+        if (currentLine > lines.length && currentIndent > 0) {
+            currentIndent--;
+            return "END";
+        }
+
         while (currentLine <= lines.length) {
             String line = getCurrentLine();
 
-            // Saltem linies buides
+            // Salta líneas vacías.
             if (line.trim().isEmpty()) {
                 currentLine++;
                 currentPosition = 0;
                 continue;
             }
 
-            // Comprovació d'indentació a l'inici de línia
+            // Comprobación de indentación al inicio de la línea.
             if (currentPosition == 0) {
                 int indent = countLeadingTabs(line);
                 if (indent < currentIndent) {
                     currentIndent--;
                     return "END";
                 } else if (indent > currentIndent) {
-                    // Si la indentació augmenta sense START previ, llencem excepció
                     throw new Exception("Indentation error at line " + currentLine + ". Unexpected indent increase.");
                 }
             }
 
-            // Identificació de tokens
             if (currentPosition < line.length()) {
                 char ch = line.charAt(currentPosition);
-                // Saltem espais i tabulacions
+                // Salta espacios y tabulaciones.
                 if (ch == ' ' || ch == '\t') {
                     currentPosition++;
                     continue;
@@ -49,55 +55,63 @@ public class Scanner {
 
                 StringBuilder lexeme = new StringBuilder();
 
-                // Identificadors
+                // Procesamiento de identificadores
                 if (Character.isLetter(ch) || ch == '_') {
                     while (currentPosition < line.length() && Character.isLetterOrDigit(line.charAt(currentPosition))) {
                         lexeme.append(line.charAt(currentPosition));
                         currentPosition++;
                     }
-                    if (lexeme.toString().equals("int")) {
+                    String word = lexeme.toString();
+
+                    // Si se esperaba el nombre de una función, se procesa primero.
+                    if (expectFunctionName) {
+                        expectFunctionName = false;
+                        if (word.equals("main"))
+                            return "MAIN";
+                        else
+                            return "ID";
+                    }
+
+                    // Procesamiento de palabras reservadas
+                    if (word.equals("int")) {
                         return "INT";
-                    } else if (lexeme.toString().equals("flt")) {
+                    } else if (word.equals("flt")) {
                         return "FLOAT";
-                    } else if (lexeme.toString().equals("chr")) {
+                    } else if (word.equals("chr")) {
                         return "CHAR";
-                    } else if (lexeme.toString().equalsIgnoreCase("null")) {
-                        return "NULL";
-                    } else if (lexeme.toString().equals("if")) {
+                    } else if (word.equals("if")) {
                         return "IF";
-                    } else if (lexeme.toString().equals("elif")) {
+                    } else if (word.equals("elif")) {
                         return "ELIF";
-                    } else if (lexeme.toString().equals("else")) {
+                    } else if (word.equals("else")) {
                         return "ELSE";
-                    } else if (lexeme.toString().equals("while")) {
+                    } else if (word.equals("while")) {
                         return "WHILE";
-                    } else if (lexeme.toString().equals("for")) {
+                    } else if (word.equals("for")) {
                         return "FOR";
-                    } else if (lexeme.toString().equals("do")) {
+                    } else if (word.equals("do")) {
                         return "DO";
-                    } else if (lexeme.toString().equals("until")) {
+                    } else if (word.equals("until")) {
                         return "UNTIL";
-                    } else if (lexeme.toString().equals("return")) {
+                    } else if (word.equals("return")) {
                         return "RETURN";
-                    } else if (lexeme.toString().equals("fn")) {
+                    } else if (word.equals("fn")) {
+                        // Al leer "fn" se activa la bandera para que el próximo identificador sea el nombre de la función.
+                        expectFunctionName = true;
                         return "FN";
-                    } else if (lexeme.toString().equals("main")) {
+                    } else if (word.equals("main")) {
                         return "MAIN";
                     } else {
-                        return "ID"; // Considerar el FUNCTION_NAME després de "fn"
+                        return "ID";
                     }
                 }
-
-                // Nombres
+                // Procesamiento de números
                 else if (Character.isDigit(ch)) {
-                    // Read the integer part
                     while (currentPosition < line.length() && Character.isDigit(line.charAt(currentPosition))) {
                         lexeme.append(line.charAt(currentPosition));
                         currentPosition++;
                     }
-                    // Check for a fractional part
                     if (currentPosition < line.length() && line.charAt(currentPosition) == '.') {
-                        // Peek ahead to ensure there's at least one digit after the dot
                         if (currentPosition + 1 < line.length() && Character.isDigit(line.charAt(currentPosition + 1))) {
                             lexeme.append('.');
                             currentPosition++;
@@ -110,8 +124,7 @@ public class Scanner {
                     }
                     return "INTEGER_LITERAL";
                 }
-
-                // Símbols
+                // Procesamiento de símbolos
                 else {
                     lexeme.append(ch);
                     currentPosition++;
@@ -119,7 +132,6 @@ public class Scanner {
                     if (ch == ':') {
                         String remaining = getCurrentLine().substring(currentPosition).trim();
                         if (!remaining.isEmpty()) {
-                            // Si hi ha codi després del ':', llencem excepció
                             throw new Exception("Error at line " + currentLine + ": unexpected code after ':'");
                         }
                         currentIndent++;
@@ -129,90 +141,90 @@ public class Scanner {
                     } else if (ch == '=') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {
                             currentPosition++;
-                            return "==";
+                            return "EQUALS";
                         } else if (currentPosition < line.length() && line.charAt(currentPosition) == '>') {
                             currentPosition++;
-                            return "=>";
+                            return "GREATER";
                         } else if (currentPosition < line.length() && line.charAt(currentPosition) == '<') {
                             currentPosition++;
-                            return "=<";
+                            return "GREATER";
                         } else {
-                            return "=";
+                            return "EQ";
                         }
                     } else if (ch == '!') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {
                             currentPosition++;
-                            return "!=";
+                            return "NOT_EQUAL";
                         } else {
-                            return "!";
+                            return "NOT";
                         }
                     } else if (ch == '<') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {
                             currentPosition++;
-                            return "<=";
+                            return "LOWER_EQUAL";
                         } else {
-                            return "<";
+                            return "LOWER";
                         }
                     } else if (ch == '>') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {
                             currentPosition++;
-                            return ">=";
+                            return "GREATER_EQUAL";
                         } else {
-                            return ">";
+                            return "GREATER";
                         }
                     } else if (ch == '+') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '+') {
                             currentPosition++;
-                            return "++";
+                            return "INC";
                         } else if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {
                             currentPosition++;
                             return "+=";
                         } else {
-                            return "+";
+                            return "SUM";
                         }
                     } else if (ch == '-') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '>') {
                             currentPosition++;
-                            return "->";
+                            return "ARROW";
                         } else if (currentPosition < line.length() && line.charAt(currentPosition) == '-') {
                             currentPosition++;
-                            return "--";
+                            return "DEC";
                         } else if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {
                             currentPosition++;
                             return "-=";
                         } else {
-                            return "-";
+                            return "SUB";
                         }
                     } else if (ch == '*') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '*') {
                             currentPosition++;
-                            return "**";
+                            return "POW";
                         } else if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {
                             currentPosition++;
                             return "*=";
                         } else {
-                            return "*";
+                            return "MULT";
                         }
                     } else if (ch == '/') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {
                             currentPosition++;
                             return "/=";
                         } else {
-                            return "/";
+                            return "DIV";
                         }
                     } else if (ch == '%') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {
                             currentPosition++;
                             return "%=";
                         } else {
-                            return "%";
+                            return "MOD";
                         }
                     } else if (ch == ',') {
-                        return ",";
+                        return "COMA";
                     } else if (ch == '(') {
-                        return "(";
+                        return "PO";
                     } else if (ch == ')') {
-                        return ")";
+                        return "PT";
                     } else if (ch == '[') {
                         return "[";
                     } else if (ch == ']') {
@@ -228,10 +240,16 @@ public class Scanner {
                     }
                 }
             }
-            // End of current line.
+            // Fin de la línea actual: se retorna EOL y se pasa a la siguiente línea.
             currentLine++;
             currentPosition = 0;
             return "EOL";
+        }
+
+        // Si ya no quedan líneas pero aún quedan bloques abiertos, se retornan los tokens "END".
+        if (currentIndent > 0) {
+            currentIndent--;
+            return "END";
         }
         return "EOF";
     }

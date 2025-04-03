@@ -26,6 +26,8 @@ public class ParsingTable {
             throw new RuntimeException(e);
         }
 
+        printTable(parsingTable);
+
     }
 
     public void createTable() throws FileNotFoundException {

@@ -5,30 +5,14 @@ import Lexicon.Scanner;
 
 public class Parser {
 
-    // Aquí aniria el Scanner
     private Scanner scanner;
-
     private final Map<String, Map<String, List<String>>> parsingTable;
     private final Stack<String> stack = new Stack<>();
-    private final List<String> inputTokens;
-
-    public Parser(List<String> inputTokens) {
-        ParsingTable pt = new ParsingTable();
-
-        this.parsingTable = pt.getParsingTable();
-        this.inputTokens = new ArrayList<>(inputTokens);
-        this.inputTokens.add("EOF");
-
-        parse();
-    }
 
     public Parser(Scanner scanner) {
         ParsingTable pt = new ParsingTable();
         this.scanner = scanner;
-
         this.parsingTable = pt.getParsingTable();
-        this.inputTokens = new ArrayList<>();
-        this.inputTokens.add("EOF");
     }
 
     public void newParse() throws Exception {
@@ -43,34 +27,51 @@ public class Parser {
         System.out.println("EOF");
     }
 
-    private void parse() {
 
-        stack.push("START");
+    public void newParse() throws Exception {
+        String token;
+        while (!(token = scanner.nextToken()).equals("EOF")) {
+            System.out.print(token + " ");
 
-        int currentIndex = 0;
+            if (token.equals("EOL") || token.equals("START") || token.equals("END")) {
+                System.out.println();
+            }
+        }
+        System.out.println("EOF");
+    }
+
+    public void parse() throws Exception {
+
+        stack.push("INICIAL");
+
+        String token = scanner.nextToken();
 
         while (!stack.isEmpty()) {
+            System.out.println(Arrays.toString(stack.toArray()));
+            System.out.printf("Token actual: %s\n", token);
             String top = stack.peek();
-            String currentToken = inputTokens.get(currentIndex); // Aquí canviar per a nextToken() del Scanner
 
-            if (top.equals(currentToken)) {
+            // Si el tope del stack es igual al token actual, lo consumimos.
+            if (top.equals(token)) {
                 stack.pop();
-                currentIndex++;
+                token = scanner.nextToken();
                 continue;
             }
 
+            // Si el tope es terminal pero no coincide, hay error.
             if (isTerminal(top)) {
-                error("Esperava " + top + " pero tenim " + currentToken);
+                error("Esperaba '" + top + "', pero se encontró '" + token + "'");
                 return;
             }
 
-            List<String> production = getProduction(top, currentToken);
-
+            // Buscamos la producción en la tabla de análisis.
+            List<String> production = getProduction(top, token);
             if (production == null) {
-                error("No hi ha producció per [" + top + ", " + currentToken + "]");
+                error("No existe producción para [" + top + ", " + token + "]");
                 return;
             }
 
+            // Quitamos el no terminal y añadimos los símbolos de la producción en orden inverso.
             stack.pop();
             List<String> reversed = new ArrayList<>(production);
             Collections.reverse(reversed);
@@ -81,7 +82,8 @@ public class Parser {
             }
         }
 
-        System.out.println("✅ INPUT CORRECTE ✅");
+        // Si se ha vaciado el stack y se consumieron correctamente los tokens, la entrada es correcta.
+        System.out.println("✅ INPUT CORRECTO ✅");
     }
 
     private List<String> getProduction(String nonTerminal, String terminal) {
