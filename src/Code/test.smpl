@@ -1,6 +1,10 @@
 fn main:
 
-    int -> a =
+    int -> a = 4
 
+    if ( a == 4 ):
+        print(a)
+    else:
+        print(a)
 
     return

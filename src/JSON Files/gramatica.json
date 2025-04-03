@@ -119,7 +119,11 @@
   },
   {
     "name": "FACTOR",
-    "tokens": [["PO", "EVAL", "PT"], ["FUNCTION_CALL"], ["ID"], ["LITERAL"], ["NOT", "FACTOR"]]
+    "tokens": [["PO", "EVAL", "PT"], ["ID", "FACTOR_PRIME"], ["LITERAL"], ["NOT", "FACTOR"]]
+  },
+  {
+    "name": "FACTOR_PRIME",
+    "tokens": [["FUNCTION_CALL"], ["EPSILON"]]
   },
   {
     "name": "LITERAL",
@@ -151,7 +155,7 @@
   },
   {
     "name": "FOR_LOOP",
-    "tokens": [["FOR", "PO", "DECLARATION", "COMA", "EVAL", "COMA", "ASSIGNMENT", "PT", "START", "CODE", "END"]]
+    "tokens": [["FOR", "PO", "DECLARATION", "COMA", "EVAL", "COMA","ID", "ASSIGNMENT", "PT", "START", "CODE", "END"]]
   },
   {
     "name": "UNTIL_LOOP",

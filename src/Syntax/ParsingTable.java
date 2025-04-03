@@ -15,42 +15,35 @@ public class ParsingTable {
 
     public Map<String, Map<String, List<String>>> parsingTable;
 
-
     public ParsingTable() {
-
         parsingTable = new HashMap<>();
-
         try {
             createTable();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-
         printTable(parsingTable);
-
     }
 
     public void createTable() throws FileNotFoundException {
-
         Gson gson = new Gson();
-
         Rule[] grammar = gson.fromJson(new FileReader("src/JSON Files/gramatica.json"), Rule[].class);
-
         JsonObject firstFollow = gson.fromJson(new FileReader("src/JSON Files/first_and_follow.json"), JsonObject.class);
         JsonObject firstMap = firstFollow.getAsJsonObject("first");
         JsonObject followMap = firstFollow.getAsJsonObject("follow");
-
 
         for (Rule rule : grammar) {
             for (List<String> production : rule.tokens) {
                 Set<String> firstSet = computeFirst(production, firstMap);
 
+                // Para cada terminal del conjunto FIRST (excepto EPSILON) se inserta la producción
                 for (String terminal : firstSet) {
                     if (!terminal.equals("EPSILON")) {
                         insert(parsingTable, rule.name, terminal, production);
                     }
                 }
 
+                // Si la producción es anulable, se insertan las producciones para cada terminal del FOLLOW
                 if (firstSet.contains("EPSILON")) {
                     JsonArray followArray = followMap.getAsJsonArray(rule.name);
                     for (JsonElement el : followArray) {
@@ -60,25 +53,44 @@ public class ParsingTable {
                 }
             }
         }
-
     }
 
     private static Set<String> computeFirst(List<String> sequence, JsonObject firstMap) {
         Set<String> result = new HashSet<>();
+        boolean allNullable = true;
 
+        // Recorremos cada símbolo de la secuencia
         for (String symbol : sequence) {
+            Set<String> firstSymbol = new HashSet<>();
+
+            // Si el símbolo es un no terminal (tiene entrada en firstMap)
             if (firstMap.has(symbol)) {
                 JsonArray arr = firstMap.getAsJsonArray(symbol);
                 for (JsonElement el : arr) {
-                    result.add(el.getAsString());
+                    firstSymbol.add(el.getAsString());
                 }
-                if (!result.contains("EPSILON")) break;
+                // Se añaden al resultado todos los elementos excepto EPSILON
+                for (String s : firstSymbol) {
+                    if (!s.equals("EPSILON")) {
+                        result.add(s);
+                    }
+                }
+                // Si el símbolo no es anulable, dejamos de procesar la secuencia
+                if (!firstSymbol.contains("EPSILON")) {
+                    allNullable = false;
+                    break;
+                }
             } else {
+                // Si el símbolo es terminal, se añade y se detiene el proceso
                 result.add(symbol);
+                allNullable = false;
                 break;
             }
         }
 
+        if (allNullable) {
+            result.add("EPSILON");
+        }
         return result;
     }
 
@@ -98,5 +110,4 @@ public class ParsingTable {
     public Map<String, Map<String, List<String>>> getParsingTable() {
         return parsingTable;
     }
-
 }
