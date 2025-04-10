@@ -2,42 +2,19 @@ package Syntax;
 
 import java.util.*;
 import Lexicon.Scanner;
+import SymbolTable.SymbolTable;
 
 public class Parser {
 
     private Scanner scanner;
     private final Map<String, Map<String, List<String>>> parsingTable;
     private final Stack<String> stack = new Stack<>();
+    private SymbolTable symbolTable;
 
     public Parser(Scanner scanner) {
         ParsingTable pt = new ParsingTable();
         this.scanner = scanner;
         this.parsingTable = pt.getParsingTable();
-    }
-
-    public void newParse() throws Exception {
-        String token;
-        while (!(token = scanner.nextToken()).equals("EOF")) {
-            System.out.print(token + " ");
-
-            if (token.equals("EOL") || token.equals("START") || token.equals("END")) {
-                System.out.println();
-            }
-        }
-        System.out.println("EOF");
-    }
-
-
-    public void newParse() throws Exception {
-        String token;
-        while (!(token = scanner.nextToken()).equals("EOF")) {
-            System.out.print(token + " ");
-
-            if (token.equals("EOL") || token.equals("START") || token.equals("END")) {
-                System.out.println();
-            }
-        }
-        System.out.println("EOF");
     }
 
     public void parse() throws Exception {
