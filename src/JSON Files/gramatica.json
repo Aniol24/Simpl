@@ -1,19 +1,19 @@
 [
   {
-    "name": "START",
-    "tokens": [["FUNCTIONS", "MAIN", "EOF"]]
+    "name": "INICIAL",
+    "tokens": [["FUNCTION", "FUNCTIONS", "EOF"]]
   },
   {
     "name": "FUNCTIONS",
     "tokens": [["FUNCTION", "FUNCTIONS"], ["EPSILON"]]
   },
   {
-    "name": "MAIN",
-    "tokens": [["FN", "MAIN", "START", "CODE", "END"]]
+    "name": "FUNCTION_PRIME",
+    "tokens": [["MAIN"], ["ID"]]
   },
   {
     "name": "FUNCTION",
-    "tokens": [["FN", "FUNCTION_NAME", "PARAM_DEF", "TYPE_DEF", "START", "CODE", "END"]]
+    "tokens": [["FN", "FUNCTION_PRIME", "PARAM_DEF", "TYPE_DEF", "START", "CODE", "END"]]
   },
   {
     "name": "TYPE_DEF",
@@ -45,7 +45,11 @@
   },
   {
     "name": "INSTRUCTION",
-    "tokens": [["DECLARATION", "EOL"], ["ASSIGNMENT", "EOL"], ["FUNCTION_CALL", "EOL"], ["RETURN_STATEMENT", "EOL"], ["CONDITIONAL"], ["ITERATIVE"]]
+    "tokens": [["DECLARATION", "EOL"], ["ID","INSTRUCTION_PRIME", "EOL"], ["RETURN_STATEMENT", "EOL"], ["CONDITIONAL"], ["ITERATIVE"]]
+  },
+  {
+    "name": "INSTRUCTION_PRIME",
+    "tokens": [["ASSIGNMENT"], ["FUNCTION_CALL"]]
   },
   {
     "name": "DECLARATION",
@@ -57,15 +61,19 @@
   },
   {
     "name": "ASSIGNMENT",
-    "tokens": [["ID", "EQ", "EVAL"], ["ID", "INC"], ["ID", "DEC"], ["ID", "POW"]]
+    "tokens": [["EQ", "EXPR"], ["INC"], ["DEC"], ["POW"]]
   },
   {
     "name": "RETURN_STATEMENT",
-    "tokens": [["RETURN", "EVAL"], ["RETURN"]]
+    "tokens": [["RETURN", "OPT_EVAL"]]
+  },
+  {
+    "name": "OPT_EVAL",
+    "tokens": [["EVAL"], ["EPSILON"]]
   },
   {
     "name": "FUNCTION_CALL",
-    "tokens": [["FUNCTION_NAME", "ARG_LIST"]]
+    "tokens": [["ARG_LIST"]]
   },
   {
     "name": "ARG_LIST",
@@ -111,7 +119,11 @@
   },
   {
     "name": "FACTOR",
-    "tokens": [["PO", "EVAL", "PT"], ["FUNCTION_CALL"], ["ID"], ["LITERAL"], ["NOT", "FACTOR"]]
+    "tokens": [["PO", "EVAL", "PT"], ["ID", "FACTOR_PRIME"], ["LITERAL"], ["NOT", "FACTOR"]]
+  },
+  {
+    "name": "FACTOR_PRIME",
+    "tokens": [["FUNCTION_CALL"], ["EPSILON"]]
   },
   {
     "name": "LITERAL",
@@ -143,7 +155,7 @@
   },
   {
     "name": "FOR_LOOP",
-    "tokens": [["FOR", "PO", "DECLARATION", "COMA", "EVAL", "COMA", "ASSIGNMENT", "PT", "START", "CODE", "END"]]
+    "tokens": [["FOR", "PO", "DECLARATION", "COMA", "EVAL", "COMA","ID", "ASSIGNMENT", "PT", "START", "CODE", "END"]]
   },
   {
     "name": "UNTIL_LOOP",

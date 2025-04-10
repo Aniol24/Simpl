@@ -89,7 +89,7 @@ public class analitzadorGramatica {
         } while (changed);
 
         // FOLLOW
-        follow.get("START").add("EOF");
+        follow.get("INICIAL").add("EOF");
 
         do {
             changed = false;
