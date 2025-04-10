@@ -8,6 +8,8 @@ public class Parser {
     private Scanner scanner;
     private final Map<String, Map<String, List<String>>> parsingTable;
     private final Stack<String> stack = new Stack<>();
+    private final Stack<TreeNode> nodeStack = new Stack<>();
+    private TreeNode parseTreeRoot;
 
     public Parser(Scanner scanner) {
         ParsingTable pt = new ParsingTable();
@@ -15,34 +17,13 @@ public class Parser {
         this.parsingTable = pt.getParsingTable();
     }
 
-    public void newParse() throws Exception {
-        String token;
-        while (!(token = scanner.nextToken()).equals("EOF")) {
-            System.out.print(token + " ");
-
-            if (token.equals("EOL") || token.equals("START") || token.equals("END")) {
-                System.out.println();
-            }
-        }
-        System.out.println("EOF");
-    }
-
-
-    public void newParse() throws Exception {
-        String token;
-        while (!(token = scanner.nextToken()).equals("EOF")) {
-            System.out.print(token + " ");
-
-            if (token.equals("EOL") || token.equals("START") || token.equals("END")) {
-                System.out.println();
-            }
-        }
-        System.out.println("EOF");
-    }
-
     public void parse() throws Exception {
-
         stack.push("INICIAL");
+        parseTreeRoot = new TreeNode("ROOT");
+        parseTreeRoot.setRoot(true);
+        TreeNode initialNode = new TreeNode("INICIAL");
+        parseTreeRoot.addChild(initialNode);
+        nodeStack.push(initialNode);
 
         String token = scanner.nextToken();
 
@@ -51,39 +32,52 @@ public class Parser {
             System.out.printf("Token actual: %s\n", token);
             String top = stack.peek();
 
-            // Si el tope del stack es igual al token actual, lo consumimos.
             if (top.equals(token)) {
                 stack.pop();
+                nodeStack.pop();
                 token = scanner.nextToken();
                 continue;
             }
 
-            // Si el tope es terminal pero no coincide, hay error.
             if (isTerminal(top)) {
                 error("Esperaba '" + top + "', pero se encontró '" + token + "'");
                 return;
             }
 
-            // Buscamos la producción en la tabla de análisis.
             List<String> production = getProduction(top, token);
             if (production == null) {
                 error("No existe producción para [" + top + ", " + token + "]");
                 return;
             }
 
-            // Quitamos el no terminal y añadimos los símbolos de la producción en orden inverso.
             stack.pop();
-            List<String> reversed = new ArrayList<>(production);
-            Collections.reverse(reversed);
-            for (String symbol : reversed) {
-                if (!symbol.equals("EPSILON")) {
-                    stack.push(symbol);
+            TreeNode parentNode = nodeStack.pop();
+
+            // No duplicamos el símbolo si ya lo contiene el nodo padre
+            TreeNode nonTerminalNode = parentNode.getValue().equals(top) ? parentNode : new TreeNode(top);
+            if (nonTerminalNode != parentNode) {
+                parentNode.addChild(nonTerminalNode);
+            }
+
+            List<TreeNode> childrenNodes = new ArrayList<>();
+            for (String symbol : production) {
+                TreeNode child = new TreeNode(symbol);
+                nonTerminalNode.addChild(child);
+                childrenNodes.add(child);
+            }
+
+            Collections.reverse(childrenNodes);
+            for (TreeNode child : childrenNodes) {
+                if (!child.getValue().equals("EPSILON")) {
+                    stack.push(child.getValue());
+                    nodeStack.push(child);
                 }
             }
         }
 
-        // Si se ha vaciado el stack y se consumieron correctamente los tokens, la entrada es correcta.
         System.out.println("✅ INPUT CORRECTO ✅");
+        System.out.println("\nÁrbol de derivación:");
+        printTree(parseTreeRoot, "", true);
     }
 
     private List<String> getProduction(String nonTerminal, String terminal) {
@@ -97,5 +91,16 @@ public class Parser {
 
     private void error(String msg) {
         System.err.println("ERROR: " + msg);
+    }
+
+    private void printTree(TreeNode node, String prefix, boolean isLast) {
+        System.out.print(prefix);
+        System.out.print(isLast ? "└── " : "├── ");
+        System.out.println(node.getValue());
+
+        List<TreeNode> children = node.getChildren();
+        for (int i = 0; i < children.size(); i++) {
+            printTree(children.get(i), prefix + (isLast ? "    " : "│   "), i == children.size() - 1);
+        }
     }
 }
