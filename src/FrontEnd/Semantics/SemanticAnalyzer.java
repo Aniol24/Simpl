@@ -13,11 +13,8 @@ public class SemanticAnalyzer {
     }
 
     private void analyze(TreeNode node) {
-        // Perform semantic analysis on the node
-        // This is a placeholder for the actual semantic analysis logic
         System.out.println("Analyzing node: " + node.getValue());
 
-        // Recursively analyze child nodes
         for (TreeNode child : node.getChildren()) {
             analyze(child);
         }

@@ -1,0 +1,152 @@
+[
+  {
+    "name": "START",
+    "tokens": [["FUNCTIONS", "MAIN", "EOF"]]
+  },
+  {
+    "name": "FUNCTIONS",
+    "tokens": [["FUNCTION", "FUNCTIONS"], ["EPSILON"]]
+  },
+  {
+    "name": "MAIN",
+    "tokens": [["FN", "MAIN", "START", "CODE", "END"]]
+  },
+  {
+    "name": "FUNCTION",
+    "tokens": [["FN", "FUNCTION_NAME", "PARAM_DEF", "TYPE_DEF", "START", "CODE", "END"]]
+  },
+  {
+    "name": "TYPE_DEF",
+    "tokens": [["ARROW", "VAR_TYPE"], ["EPSILON"]]
+  },
+  {
+    "name": "VAR_TYPE",
+    "tokens": [["INT"], ["CHAR"], ["FLOAT"]]
+  },
+  {
+    "name": "PARAM_DEF",
+    "tokens": [["PO", "PARAMS", "PT"], ["EPSILON"]]
+  },
+  {
+    "name": "PARAMS",
+    "tokens": [["PARAM", "NEXT_PARAM"], ["EPSILON"]]
+  },
+  {
+    "name": "PARAM",
+    "tokens": [["VAR_TYPE", "ARROW", "ID"]]
+  },
+  {
+    "name": "NEXT_PARAM",
+    "tokens": [["COMA", "PARAM", "NEXT_PARAM"], ["EPSILON"]]
+  },
+  {
+    "name": "CODE",
+    "tokens": [["INSTRUCTION", "CODE"], ["EPSILON"]]
+  },
+  {
+    "name": "INSTRUCTION",
+    "tokens": [["DECLARATION", "EOL"], ["ASSIGNMENT", "EOL"], ["FUNCTION_CALL", "EOL"], ["RETURN_STATEMENT", "EOL"], ["CONDITIONAL"], ["ITERATIVE"]]
+  },
+  {
+    "name": "DECLARATION",
+    "tokens": [["VAR_TYPE", "ARROW", "ID", "INIT_OPT"]]
+  },
+  {
+    "name": "INIT_OPT",
+    "tokens": [["EQ", "EVAL"], ["EPSILON"]]
+  },
+  {
+    "name": "ASSIGNMENT",
+    "tokens": [["ID", "EQ", "EVAL"], ["ID", "INC"], ["ID", "DEC"], ["ID", "POW"]]
+  },
+  {
+    "name": "RETURN_STATEMENT",
+    "tokens": [["RETURN", "EVAL"], ["RETURN"]]
+  },
+  {
+    "name": "FUNCTION_CALL",
+    "tokens": [["FUNCTION_NAME", "ARG_LIST"]]
+  },
+  {
+    "name": "ARG_LIST",
+    "tokens": [["PO", "EVAL", "NEXT_ARG", "PT"], ["EPSILON"]]
+  },
+  {
+    "name": "NEXT_ARG",
+    "tokens": [["COMA", "EVAL", "NEXT_ARG"], ["EPSILON"]]
+  },
+  {
+    "name": "EVAL",
+    "tokens": [["EXPR", "EVAL_PRIME"]]
+  },
+  {
+    "name": "EVAL_PRIME",
+    "tokens": [
+      ["AND", "EXPR", "EVAL_PRIME"],
+      ["OR", "EXPR", "EVAL_PRIME"],
+      ["EQUALS", "EXPR", "EVAL_PRIME"],
+      ["NOT_EQUAL", "EXPR", "EVAL_PRIME"],
+      ["LOWER", "EXPR", "EVAL_PRIME"],
+      ["LOWER_EQUAL", "EXPR", "EVAL_PRIME"],
+      ["GREATER", "EXPR", "EVAL_PRIME"],
+      ["GREATER_EQUAL", "EXPR", "EVAL_PRIME"],
+      ["EPSILON"]
+    ]
+  },
+  {
+    "name": "EXPR",
+    "tokens": [["TERM", "EXPR_PRIME"]]
+  },
+  {
+    "name": "EXPR_PRIME",
+    "tokens": [["SUM", "TERM", "EXPR_PRIME"], ["SUB", "TERM", "EXPR_PRIME"], ["EPSILON"]]
+  },
+  {
+    "name": "TERM",
+    "tokens": [["FACTOR", "TERM_PRIME"]]
+  },
+  {
+    "name": "TERM_PRIME",
+    "tokens": [["MULT", "FACTOR", "TERM_PRIME"], ["DIV", "FACTOR", "TERM_PRIME"], ["MOD", "FACTOR", "TERM_PRIME"], ["EPSILON"]]
+  },
+  {
+    "name": "FACTOR",
+    "tokens": [["PO", "EVAL", "PT"], ["FUNCTION_CALL"], ["ID"], ["LITERAL"], ["NOT", "FACTOR"]]
+  },
+  {
+    "name": "LITERAL",
+    "tokens": [["INTEGER_LITERAL"], ["FLOAT_LITERAL"], ["CHAR_LITERAL"]]
+  },
+  {
+    "name": "CONDITIONAL",
+    "tokens": [["IF_STATEMENT", "ELIF_BLOCKS", "ELSE_BLOCK"]]
+  },
+  {
+    "name": "IF_STATEMENT",
+    "tokens": [["IF", "PO", "EVAL", "PT", "START", "CODE", "END"]]
+  },
+  {
+    "name": "ELIF_BLOCKS",
+    "tokens": [["ELIF", "PO", "EVAL", "PT", "START", "CODE", "END", "ELIF_BLOCKS"], ["EPSILON"]]
+  },
+  {
+    "name": "ELSE_BLOCK",
+    "tokens": [["ELSE", "START", "CODE", "END"], ["EPSILON"]]
+  },
+  {
+    "name": "ITERATIVE",
+    "tokens": [["WHILE_LOOP"], ["FOR_LOOP"], ["UNTIL_LOOP"]]
+  },
+  {
+    "name": "WHILE_LOOP",
+    "tokens": [["WHILE", "PO", "EVAL", "PT", "START", "CODE", "END"]]
+  },
+  {
+    "name": "FOR_LOOP",
+    "tokens": [["FOR", "PO", "DECLARATION", "COMA", "EVAL", "COMA", "ASSIGNMENT", "PT", "START", "CODE", "END"]]
+  },
+  {
+    "name": "UNTIL_LOOP",
+    "tokens": [["DO", "START", "CODE", "END", "UNTIL", "PO", "EVAL", "PT"]]
+  }
+]
