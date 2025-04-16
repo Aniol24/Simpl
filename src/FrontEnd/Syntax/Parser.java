@@ -1,13 +1,14 @@
-package Syntax;
+package FrontEnd.Syntax;
 
 import java.util.*;
-import Lexicon.Scanner;
+import FrontEnd.Lexicon.Scanner;
+import FrontEnd.Lexicon.Token;
 
 public class Parser {
 
     private Scanner scanner;
     private final Map<String, Map<String, List<String>>> parsingTable;
-    private final Stack<String> stack = new Stack<>();
+    private final Stack<Token> stack = new Stack<>();
     private final Stack<TreeNode> nodeStack = new Stack<>();
     private TreeNode parseTreeRoot;
 
@@ -18,35 +19,45 @@ public class Parser {
     }
 
     public void parse() throws Exception {
-        stack.push("INICIAL");
-        parseTreeRoot = new TreeNode("ROOT");
+        stack.push(new Token("INICIAL", 0));
+        parseTreeRoot = new TreeNode(new Token("ROOT", 0));
         parseTreeRoot.setRoot(true);
-        TreeNode initialNode = new TreeNode("INICIAL");
+        TreeNode initialNode = new TreeNode(new Token("INICIAL", 0));
         parseTreeRoot.addChild(initialNode);
         nodeStack.push(initialNode);
 
-        String token = scanner.nextToken();
+        Token token = scanner.nextToken();
+        System.out.println("Token value: " + token.getValue());
+        System.out.println("Token attribute: " + token.getAttribute());
+        System.out.println("Token line: " + token.getLine());
 
         while (!stack.isEmpty()) {
-            System.out.println(Arrays.toString(stack.toArray()));
-            System.out.printf("Token actual: %s\n", token);
-            String top = stack.peek();
+            printStack(stack);
+            System.out.printf("Token actual: %s\n", token.getValue());
+            Token top = stack.peek();
 
-            if (top.equals(token)) {
+            if (top.getValue().equals(token.getValue())) {
+                // Agafem el node abans del pop i actualitzem les dades
+                TreeNode currentNode = nodeStack.peek();
+                currentNode.setToken(new Token(token));
+
                 stack.pop();
                 nodeStack.pop();
                 token = scanner.nextToken();
+                System.out.println("Token value: " + token.getValue());
+                System.out.println("Token attribute: " + token.getAttribute());
+                System.out.println("Token line: " + token.getLine());
                 continue;
             }
 
-            if (isTerminal(top)) {
-                error("Esperaba '" + top + "', pero se encontró '" + token + "'");
+            if (isTerminal(top.getValue())) {
+                error("Esperaba '" + top.getValue() + "', pero se encontró '" + token.getValue() + "'");
                 return;
             }
 
-            List<String> production = getProduction(top, token);
+            List<String> production = getProduction(top.getValue(), token.getValue());
             if (production == null) {
-                error("No existe producción para [" + top + ", " + token + "]");
+                error("No existe producción para [" + top.getValue() + ", " + token.getValue() + "] para " + token.getAttribute() + " en la línea " + token.getLine());
                 return;
             }
 
@@ -54,14 +65,14 @@ public class Parser {
             TreeNode parentNode = nodeStack.pop();
 
             // No duplicamos el símbolo si ya lo contiene el nodo padre
-            TreeNode nonTerminalNode = parentNode.getValue().equals(top) ? parentNode : new TreeNode(top);
+            TreeNode nonTerminalNode = parentNode.getValue().equals(top.getValue()) ? parentNode : new TreeNode(top);
             if (nonTerminalNode != parentNode) {
                 parentNode.addChild(nonTerminalNode);
             }
 
             List<TreeNode> childrenNodes = new ArrayList<>();
             for (String symbol : production) {
-                TreeNode child = new TreeNode(symbol);
+                TreeNode child = new TreeNode(new Token(symbol, token.getLine()));
                 nonTerminalNode.addChild(child);
                 childrenNodes.add(child);
             }
@@ -69,7 +80,7 @@ public class Parser {
             Collections.reverse(childrenNodes);
             for (TreeNode child : childrenNodes) {
                 if (!child.getValue().equals("EPSILON")) {
-                    stack.push(child.getValue());
+                    stack.push(child.getToken());
                     nodeStack.push(child);
                 }
             }
@@ -94,13 +105,33 @@ public class Parser {
     }
 
     private void printTree(TreeNode node, String prefix, boolean isLast) {
-        System.out.print(prefix);
+        System.out.print("\n" +prefix);
         System.out.print(isLast ? "└── " : "├── ");
-        System.out.println(node.getValue());
+        System.out.print(node.getValue());
+        if (!Objects.equals(node.getAttribute(), "NO_ATTRIBUTE")) {
+            System.out.print(" (" + node.getAttribute() + ")");
+        }
 
         List<TreeNode> children = node.getChildren();
         for (int i = 0; i < children.size(); i++) {
             printTree(children.get(i), prefix + (isLast ? "    " : "│   "), i == children.size() - 1);
         }
+    }
+
+    public TreeNode getParseTreeRoot() {
+        return parseTreeRoot;
+    }
+
+    private void printStack(Stack<Token> stack) {
+        System.out.print("Stack: [");
+        boolean first = true;
+        for (Token td : stack) {
+            if (!first) {
+                System.out.print(", ");
+            }
+            System.out.print(td.getValue());
+            first = false;
+        }
+        System.out.println("]");
     }
 }

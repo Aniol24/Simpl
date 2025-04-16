@@ -1,4 +1,4 @@
-package Syntax;
+package FrontEnd.Syntax;
 
 import com.google.gson.*;
 
@@ -27,8 +27,8 @@ public class ParsingTable {
 
     public void createTable() throws FileNotFoundException {
         Gson gson = new Gson();
-        Rule[] grammar = gson.fromJson(new FileReader("src/JSON Files/gramatica.json"), Rule[].class);
-        JsonObject firstFollow = gson.fromJson(new FileReader("src/JSON Files/first_and_follow.json"), JsonObject.class);
+        Rule[] grammar = gson.fromJson(new FileReader("src/Files/JSON/gramatica.json"), Rule[].class);
+        JsonObject firstFollow = gson.fromJson(new FileReader("src/Files/JSON/first_and_follow.json"), JsonObject.class);
         JsonObject firstMap = firstFollow.getAsJsonObject("first");
         JsonObject followMap = firstFollow.getAsJsonObject("follow");
 

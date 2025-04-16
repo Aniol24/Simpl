@@ -1,6 +1,8 @@
-import Preprocessor.Preprocessor;
-import Syntax.Parser;
-import Lexicon.Scanner;
+import FrontEnd.Preprocessor.Preprocessor;
+import FrontEnd.Semantics.SemanticAnalyzer;
+import Global.SymbolTable.SymbolTable;
+import FrontEnd.Syntax.Parser;
+import FrontEnd.Lexicon.Scanner;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,7 +12,7 @@ import java.nio.file.Paths;
 public class Main {
     public static void main(String[] args) {
 
-        Path codePath = Paths.get("src/Code/test.smpl");
+        Path codePath = Paths.get("src/Files/Examples/code.smpl");
 
         String codeContent = "";
 
@@ -26,11 +28,13 @@ public class Main {
         Scanner scanner = new Scanner(pureCode);
         Parser parser = new Parser(scanner);
 
-
         try {
             parser.parse();
         } catch (Exception e) {
             System.err.println("Error parsing the code: " + e.getMessage());
         }
+
+        SymbolTable symbolTable = new SymbolTable();
+        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(symbolTable, parser.getParseTreeRoot());
     }
 }
