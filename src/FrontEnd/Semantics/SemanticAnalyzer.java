@@ -253,7 +253,6 @@ public class SemanticAnalyzer {
             reportError(getLine(funcNode), "Function '" + funcSymbol.getName() + "' is missing its code block (START...END).");
         }
 
-
         symbolTable.exitScope(); // Exit function scope
         currentFunction = previousFunction; // Restore previous function context
     }
