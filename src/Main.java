@@ -35,6 +35,6 @@ public class Main {
         }
 
         SymbolTable symbolTable = new SymbolTable();
-        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(symbolTable, parser.getParseTreeRoot());
+        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser.getParseTreeRoot());
     }
 }

@@ -10,10 +10,6 @@ fn mult(int -> a, int -> b) -> int:
 fn div(int -> a, int -> b) -> int:
     return a / b
 
-# This function returns char
-fn returnChar(chr -> c) -> chr:
-    return c
-
 ##
 Funcio main
 ##
@@ -21,12 +17,9 @@ Funcio main
 fn main:
     int -> a = 4
     int -> b = 5
-    flt -> c = 3.14
-    #Hello
+
     int -> c = sum(a, b)
     int -> d = sub(c, a)
 
     b = mult(d, a)
-    a = div(b, sum(d, c))	# igual m'he filpat, pero podria ser possible
-
-    chr -> hello = returnChar('a')
+    a = div(b, sum(d, c))

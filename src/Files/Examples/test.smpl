@@ -1,6 +1,7 @@
 fn main:
 
-    if (a):
-        print (a)
+    int -> a = 4
+    a = 4 + 3
+    b = a
 
     return

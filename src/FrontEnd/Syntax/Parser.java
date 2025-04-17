@@ -105,12 +105,13 @@ public class Parser {
     }
 
     private void printTree(TreeNode node, String prefix, boolean isLast) {
-        System.out.print("\n" +prefix);
+        System.out.print(prefix);
         System.out.print(isLast ? "└── " : "├── ");
         System.out.print(node.getValue());
         if (!Objects.equals(node.getAttribute(), "NO_ATTRIBUTE")) {
             System.out.print(" (" + node.getAttribute() + ")");
         }
+        System.out.println();
 
         List<TreeNode> children = node.getChildren();
         for (int i = 0; i < children.size(); i++) {
