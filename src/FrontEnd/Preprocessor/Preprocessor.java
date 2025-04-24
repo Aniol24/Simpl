@@ -5,14 +5,14 @@ import java.util.regex.Pattern;
 public class Preprocessor {
 
     /**
-     * Removes single-line comments and multi-line comments from the given text.
+     * Elimina comentarios en el código fuente.
      *
-     * @param code The input text from which comments should be removed.
-     * @return The text with comments removed.
+     * @param code El código fuente como una cadena de texto.
+     * @return El código fuente sin comentarios.
      */
     public static String removeComments(String code) {
 
-        // Remove multi-line comments that start and end with "##"
+        // Elimina comentarios multilínea que empiezan y terminan con '##'
         Pattern multiLinePattern = Pattern.compile("(?s)##.*?##");
         code = multiLinePattern.matcher(code).replaceAll(match -> {
             String m = match.group();
@@ -20,7 +20,7 @@ public class Preprocessor {
             return "\n".repeat(lineCount);
         });
 
-        // Remove single line comments that start with '#'
+        // Elimina comentarios de una sola línea que empiezan con '#'
         code = code.replaceAll("(?m)#.*$", "");
         return code;
     }

@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="Versió 21 SDK">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="Neteja">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Preprocessor/Preprocessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Preprocessor/Preprocessor.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +118,7 @@
       <workItem from="1744826804361" duration="13727000" />
       <workItem from="1745330642977" duration="2560000" />
       <workItem from="1745499988553" duration="1128000" />
-      <workItem from="1745501144616" duration="681000" />
+      <workItem from="1745501144616" duration="1417000" />
     </task>
     <task id="LOCAL-00001" summary="Versió 21 SDK">
       <option name="closed" value="true" />
@@ -135,7 +136,23 @@
       <option name="project" value="LOCAL" />
       <updated>1745501511448</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Versió 21 SDK">
+      <option name="closed" value="true" />
+      <created>1745501840156</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1745501840156</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Neteja">
+      <option name="closed" value="true" />
+      <created>1745502288445</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1745502288445</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -143,7 +160,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Versió 21 SDK" />
-    <option name="LAST_COMMIT_MESSAGE" value="Versió 21 SDK" />
+    <MESSAGE value="Neteja" />
+    <option name="LAST_COMMIT_MESSAGE" value="Neteja" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
