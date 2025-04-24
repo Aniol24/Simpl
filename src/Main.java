@@ -14,7 +14,7 @@ public class Main {
 
         Path codePath = Paths.get("src/Files/Examples/code.smpl");
 
-        String codeContent = "";
+        String codeContent;
 
         try {
             codeContent = Files.readString(codePath);
@@ -34,7 +34,6 @@ public class Main {
             System.err.println("Error parsing the code: " + e.getMessage());
         }
 
-        SymbolTable symbolTable = new SymbolTable();
         SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser.getParseTreeRoot());
     }
 }
