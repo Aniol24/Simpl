@@ -29,7 +29,6 @@ public class SemanticAnalyzer {
         }
     }
 
-    // --- Main Dispatcher ---
     private void analyzeNode(TreeNode node) {
         if (node == null || "EPSILON".equals(node.getValue())) {
             return;
@@ -37,7 +36,7 @@ public class SemanticAnalyzer {
 
         boolean scopeEntered = false;
         String nodeValue = node.getValue();
-        // --- Scope Entry ---
+
        if ("IF_STMT".equals(nodeValue) || "ELIF_BLOCK".equals(nodeValue) || "ELSE_BLOCK".equals(nodeValue)
                 || "WHILE_LOOP".equals(nodeValue) || "FOR_LOOP".equals(nodeValue) || "UNTIL_LOOP".equals(nodeValue)) {
             if (hasStartEnd(node)) {
@@ -46,7 +45,6 @@ public class SemanticAnalyzer {
             }
         }
 
-        // --- Dispatch based on Node Type ---
         switch (nodeValue) {
             case "ROOT":
                 analyzeProgram(node);
@@ -87,7 +85,6 @@ public class SemanticAnalyzer {
         }
     }
 
-    // Helper to check if a node structure implies a START/END block
     private boolean hasStartEnd(TreeNode node) {
         boolean hasStart = false;
         boolean hasEnd = false;
@@ -98,13 +95,8 @@ public class SemanticAnalyzer {
         return hasStart && hasEnd;
     }
 
-
-    // --- Specific Node Analysis Methods ---
-
     private void analyzeProgram(TreeNode programNode) {
-        // Register all function signatures (declarations)
         registerFunctionSignatures(programNode);
-        // Analyze function bodies and main
         analyzeFunctionBodies(programNode);
     }
 
@@ -136,7 +128,6 @@ public class SemanticAnalyzer {
 
 
     private Symbol declareFunctionSignature(TreeNode funcNode) {
-        // --- Extract Name ---
         TreeNode fnTokenNode = findNode(funcNode, "FN");
         TreeNode funcPrimeNode;
         TreeNode idNode = null;
@@ -157,8 +148,6 @@ public class SemanticAnalyzer {
             reportError(getLine(funcNode), "Expected FN token node within FUNCTION node.");
         }
 
-
-        // Determine name and final line number based on ID or MAIN found
         if (idNode != null) {
             funcName = idNode.getAttribute();
             line = getLine(idNode);
@@ -170,11 +159,9 @@ public class SemanticAnalyzer {
             return null;
         }
 
-        // --- Extract Parameters and Return Type ---
         List<Symbol> parameters = extractParameters(funcNode);
         String returnType = determineReturnType(funcNode);
 
-        // --- Declare in Global Scope ---
         Symbol funcSymbol = new Symbol(funcName, returnType, line, parameters);
         Scope globalScope = symbolTable.getGlobalScope();
         if (!globalScope.declareSymbol(funcSymbol)) {
@@ -188,7 +175,7 @@ public class SemanticAnalyzer {
 
 
     private void analyzeFunction(TreeNode funcNode) {
-        Symbol funcSymbol = symbolTable.lookupSymbol(getFunctionName(funcNode)); // Look up the already declared function
+        Symbol funcSymbol = symbolTable.lookupSymbol(getFunctionName(funcNode));
         if (funcSymbol == null || !funcSymbol.isFunction()) {
             reportError(getLine(funcNode), "Internal error: Function '" + getFunctionName(funcNode) + "' not found during analysis phase.");
             return;
@@ -252,7 +239,7 @@ public class SemanticAnalyzer {
 
         // Busca PARAM_DEF bajo FUNCTION_PRIME
         TreeNode paramDef = findNode(funcPrimeNode, "PARAM_DEF");
-        if (paramDef == null) return params;  // sin parámetros
+        if (paramDef == null) return params;
 
         // Dentro de PARAM_DEF, busca PARAMS
         TreeNode paramsContainer = findNode(paramDef, "PARAMS");
@@ -315,7 +302,7 @@ public class SemanticAnalyzer {
         boolean isInitialized = false;
         String initExprType;
 
-        if (initOptNode != null && initOptNode.getChildren().size() > 1) { // Check if not epsilon
+        if (initOptNode != null && initOptNode.getChildren().size() > 1) { // Miramos si no es epsilon
             TreeNode eqNode = findNode(initOptNode, "EQ");
             TreeNode evalNode = findNode(initOptNode, "EVAL");
             if (eqNode != null && evalNode != null) {
@@ -339,7 +326,6 @@ public class SemanticAnalyzer {
         }
     }
 
-    // Represents instruction starting with ID (assignment or function call)
     private void analyzeIdInstruction(TreeNode idInstrNode) {
         TreeNode idNode = findNode(idInstrNode, "ID");
         TreeNode instructionPrimeNode = findNode(idInstrNode, "INSTRUCTION_PRIME");
@@ -362,7 +348,7 @@ public class SemanticAnalyzer {
         TreeNode funcCallNode = findNode(instructionPrimeNode, "FUNCTION_CALL");
 
         if (assignmentNode != null) {
-            // --- Assignment (ID = <eval> or ID++ etc.) ---
+            // Assignment (ID = <eval> or ID++ etc.)
             if (symbol.isFunction()) {
                 reportError(line, "Cannot assign to function '" + name + "'.");
                 return;
@@ -394,7 +380,7 @@ public class SemanticAnalyzer {
             }
 
         } else if (funcCallNode != null) {
-            // --- Function Call (ID (<args>)) ---
+            // Function Call (ID (<args>))
             if (!symbol.isFunction()) {
                 reportError(line, "'" + name + "' is a variable, not a function, cannot call it.");
                 return;
@@ -406,7 +392,6 @@ public class SemanticAnalyzer {
         }
     }
     private void analyzeConditionalOrLoop(TreeNode node) {
-        // Analyze the condition (<eval>)
         TreeNode evalNode = findNodeRecursive(node, "EVAL");
         if (evalNode != null) {
             analyzeEval(evalNode);
@@ -414,7 +399,6 @@ public class SemanticAnalyzer {
             reportError(getLine(node), "Missing condition expression in " + node.getValue() + " statement.");
         }
 
-        // Analyze the code block (which handles its own scope if START/END present)
         TreeNode codeBlock = findCodeBlock(node);
         if(codeBlock != null) {
             analyzeNode(codeBlock);
@@ -428,7 +412,7 @@ public class SemanticAnalyzer {
 
         symbolTable.enterScope("for_loop_scope@" + getLine(forNode));
 
-        // Analyze Declaration
+        // Declaration
         TreeNode declNode = findNode(forNode, "DECLARATION");
         if (declNode != null) {
             analyzeDeclaration(declNode);
@@ -436,7 +420,7 @@ public class SemanticAnalyzer {
             reportError(getLine(forNode), "Missing declaration part in for loop.");
         }
 
-        // Analyze Condition
+        // Condition
         TreeNode evalNode = findNode(forNode, "EVAL");
         if (evalNode != null) {
             analyzeEval(evalNode);
@@ -444,7 +428,7 @@ public class SemanticAnalyzer {
             reportError(getLine(forNode), "Missing condition part in for loop.");
         }
 
-        // Analyze Update (ID <assignment>)
+        // Update (ID <assignment>)
         TreeNode idNode = findNode(forNode, "ID");
         TreeNode assignmentNode = findNode(forNode, "ASSIGNMENT");
         if (idNode != null && assignmentNode != null) {
@@ -512,14 +496,8 @@ public class SemanticAnalyzer {
         }
     }
 
-    // --- Expression Analysis ---
-
-    /**
-     * Analyzes an <eval> node and returns its resulting type, or null on error.
-     * Performs type checking and initialization checks.
-     */
     private String analyzeEval(TreeNode evalNode) {
-        // Grammar: <eval> ::= <expr> <eval'>
+        // <eval> ::= <expr> <eval'>
         TreeNode exprNode = findNode(evalNode, "EXPR");
         if (exprNode == null) {
             reportError(getLine(evalNode), "Invalid expression structure (missing EXPR in EVAL).");
@@ -529,10 +507,9 @@ public class SemanticAnalyzer {
         String currentType = analyzeExpr(exprNode);
         if (currentType == null) return null;
 
-        // Iterate through the <eval'> chain (AND, OR, EQUALS, NOT_EQUAL, etc.)
+        // Iteramos <eval'>
         TreeNode evalPrimeNode = findNode(evalNode, "EVAL_PRIME");
-        while (evalPrimeNode != null && evalPrimeNode.getChildren().size() > 1) { // While not epsilon
-            // Find the operator (AND, OR, EQ, NEQ, LT, LE, GT, GE) and the next EXPR
+        while (evalPrimeNode != null && evalPrimeNode.getChildren().size() > 1) {
             TreeNode operatorNode = evalPrimeNode.getChildren().getFirst();
             TreeNode nextExprNode = findNode(evalPrimeNode, "EXPR");
 
@@ -544,10 +521,8 @@ public class SemanticAnalyzer {
             String nextType = analyzeExpr(nextExprNode);
             if (nextType == null) return null;
 
-            // --- Type Checking for Boolean/Comparison Operators ---
             String operator = operatorNode.getValue();
             if (isComparisonOperator(operator)) {
-                // Comparisons (==, !=, <, <=, >, >=)
                 if (!areTypesComparable(currentType, nextType)) {
                     reportError(getLine(operatorNode), "Cannot compare types '" + currentType + "' and '" + nextType + "' using operator '" + operator + "'.");
                     return null;
@@ -570,10 +545,8 @@ public class SemanticAnalyzer {
         return currentType;
     }
 
-
-    /** Analyzes an <expr> node: <term> <expr'> */
     private String analyzeExpr(TreeNode exprNode) {
-        // Grammar: <expr> ::= <term> <expr'>
+        // <expr> ::= <term> <expr'>
         TreeNode termNode = findNode(exprNode, "TERM");
         if (termNode == null) {
             reportError(getLine(exprNode), "Invalid expression structure (missing TERM in EXPR).");
@@ -584,7 +557,7 @@ public class SemanticAnalyzer {
 
         TreeNode exprPrimeNode = findNode(exprNode, "EXPR_PRIME");
         while (exprPrimeNode != null && exprPrimeNode.getChildren().size() > 1) {
-            TreeNode operatorNode = exprPrimeNode.getChildren().getFirst(); // + or -
+            TreeNode operatorNode = exprPrimeNode.getChildren().getFirst();
             TreeNode nextTermNode = findNode(exprPrimeNode, "TERM");
 
             if (nextTermNode == null) {
@@ -594,7 +567,6 @@ public class SemanticAnalyzer {
             String nextType = analyzeTerm(nextTermNode);
             if (nextType == null) return null;
 
-            // --- Type Checking for + / - ---
             if (!isNumeric(currentType) || !isNumeric(nextType)) {
                 reportError(getLine(operatorNode), "Operator '" + operatorNode.getValue() + "' requires numeric operands, found '" + currentType + "' and '" + nextType + "'.");
                 return null;
@@ -616,7 +588,7 @@ public class SemanticAnalyzer {
 
         TreeNode termPrimeNode = findNode(termNode, "TERM_PRIME");
         while (termPrimeNode != null && termPrimeNode.getChildren().size() > 1) {
-            TreeNode operatorNode = termPrimeNode.getChildren().get(0); // *, /, %
+            TreeNode operatorNode = termPrimeNode.getChildren().get(0);
             TreeNode nextFactorNode = findNode(termPrimeNode, "FACTOR");
 
             if (nextFactorNode == null) {
@@ -626,7 +598,6 @@ public class SemanticAnalyzer {
             String nextType = analyzeFactor(nextFactorNode);
             if (nextType == null) return null;
 
-            // --- Type Checking for * / % ---
             if (!isNumeric(currentType) || !isNumeric(nextType)) {
                 reportError(getLine(operatorNode), "Operator '" + operatorNode.getValue() + "' requires numeric operands, found '" + currentType + "' and '" + nextType + "'.");
                 return null;
@@ -643,7 +614,6 @@ public class SemanticAnalyzer {
         return currentType;
     }
 
-    /** Analyzes a <factor> node: (<eval>) | ID <factor'> | <literal> | NOT <factor> */
     private String analyzeFactor(TreeNode factorNode) {
         TreeNode firstChild = factorNode.getChildren().isEmpty() ? null : factorNode.getChildren().get(0);
         if (firstChild == null) {
@@ -686,7 +656,7 @@ public class SemanticAnalyzer {
                         reportError(line, "Cannot use function '" + name + "' as a value without calling it.");
                         return null;
                     }
-                    // --- Initialization Check ---
+
                     if (!symbol.isInitialized()) {
                         reportError(line, "Variable '" + name + "' might not have been initialized before use.");
                     }
@@ -735,9 +705,6 @@ public class SemanticAnalyzer {
         }
     }
 
-    // --- Function Call Analysis ---
-
-    /** Analyzes arguments passed in a function call against expected parameters */
     private void analyzeFunctionCallArgs(TreeNode callArgsNode, Symbol functionSymbol) {
         List<String> argumentTypes = new ArrayList<>();
         List<TreeNode> argEvalNodes = findArgumentExpressions(callArgsNode);
@@ -750,18 +717,15 @@ public class SemanticAnalyzer {
             argumentTypes.add(argType);
         }
 
-        // Compare arguments with parameters
         List<Symbol> parameters = functionSymbol.getParameters();
         int callLine = getLine(callArgsNode);
 
-        // Check number of arguments
         if (argumentTypes.size() != parameters.size()) {
             reportError(callLine, "Function '" + functionSymbol.getName() + "' expects " + parameters.size() +
                     " arguments, but received " + argumentTypes.size() + ".");
             return;
         }
 
-        // Check types of arguments
         for (int i = 0; i < parameters.size(); i++) {
             String expectedType = parameters.get(i).getType();
             String actualType = argumentTypes.get(i);
@@ -779,62 +743,55 @@ public class SemanticAnalyzer {
         }
         return out;
     }
-    private List<TreeNode> findArgumentExpressions(TreeNode callArgsNode) {return findAllEvals(callArgsNode);}
-
-    // --- Type System Helpers ---
+    private List<TreeNode> findArgumentExpressions(TreeNode callArgsNode) {
+        return findAllEvals(callArgsNode);
+    }
 
     private String extractType(TreeNode varTypeNode) {
-        // Assumes VAR_TYPE has one child which is INT, FLT, or CHR token node
         if (varTypeNode == null || varTypeNode.getChildren().isEmpty()) return "unknown";
         TreeNode typeTokenNode = varTypeNode.getChildren().get(0);
         switch (typeTokenNode.getValue()) {
             case "INT":   return "int";
             case "FLOAT": return "flt";
-            case "CHAR":  return "chr"; // Make sure this matches your token name exactly
+            case "CHAR":  return "chr";
             default:      return "unknown";
         }
     }
 
-    // Basic type compatibility check (extend as needed, e.g., allow int->flt)
     private boolean isTypeCompatible(String expected, String actual) {
-        if (expected == null || actual == null) return false; // Error somewhere
+        if (expected == null || actual == null) return false; // Error posible
         if (expected.equals(actual)) return true;
-        // Allow assigning int to float?
+
         if (expected.equals("flt") && actual.equals("int")) return true;
-        // Add other compatibility rules if needed
+
         return false;
     }
 
-    // Check if a type is numeric
-    private boolean isNumeric(String type) {return "int".equals(type) || "flt".equals(type);}
+    private boolean isNumeric(String type) {
+        return "int".equals(type) || "flt".equals(type);
+    }
 
-    // Check if types are comparable (e.g., for ==, !=, <, >)
     private boolean areTypesComparable(String type1, String type2) {
         if (type1 == null || type2 == null) return false;
-        // Allow comparing same types
+
         if (type1.equals(type2)) return true;
-        // Allow comparing int and float
+
         if (isNumeric(type1) && isNumeric(type2)) return true;
-        // Add other comparable types if needed (e.g., char with char)
+
         return false;
     }
 
-
-    // Check if a type can be used in boolean contexts (if, while, AND, OR, NOT)
     private boolean isBooleanConvertible(String type) {
         if (type == null) return false;
-        // Explicit boolean type?
+
         if ("bool".equals(type)) return true;
-        // Allow integers? (0 is false, non-zero is true - depends on language rules)
-        // if ("int".equals(type)) return true;
         return false;
     }
 
-    // Promote numeric types (e.g., int + float -> float)
     private String promoteNumericType(String type1, String type2) {
         if ("flt".equals(type1) || "flt".equals(type2)) return "flt";
         if ("int".equals(type1) && "int".equals(type2)) return "int";
-        return "unknown"; // Should not happen if isNumeric check passed
+        return "unknown";
     }
 
     private boolean isComparisonOperator(String op) {
@@ -844,9 +801,6 @@ public class SemanticAnalyzer {
 
     private boolean isBooleanOperator(String op) {return "AND".equals(op) || "OR".equals(op);}
 
-    // --- Tree Navigation Helpers ---
-
-    /** Finds the first child node with the specified value/type */
     private TreeNode findNode(TreeNode parent, String value) {
         if (parent == null) return null;
         for (TreeNode child : parent.getChildren()) {
@@ -857,7 +811,6 @@ public class SemanticAnalyzer {
         return null;
     }
 
-    /** Finds the first node with the specified value/type anywhere in the subtree */
     private TreeNode findNodeRecursive(TreeNode startNode, String value) {
         if (startNode == null) return null;
         if (value.equals(startNode.getValue())) return startNode;
@@ -868,7 +821,6 @@ public class SemanticAnalyzer {
         return null;
     }
 
-    /** Finds the CODE block node, typically after START */
     private TreeNode findCodeBlock(TreeNode parent) {
         TreeNode startNode = findNode(parent, "START");
         if (startNode != null) {
@@ -916,10 +868,9 @@ public class SemanticAnalyzer {
     }
 
     private int getLine(TreeNode node) {
-        return (node != null && node.getToken() != null) ? node.getToken().getLine() : -1; // Safer line access
+        return (node != null && node.getToken() != null) ? node.getToken().getLine() : -1;
     }
 
-    // --- Error Reporting ---
     private void reportError(int line, String message) {
         semanticErrors.add("Semantic Error at line " + line + ": " + message);
     }
