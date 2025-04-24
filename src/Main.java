@@ -3,6 +3,7 @@ import FrontEnd.Semantics.SemanticAnalyzer;
 import Global.SymbolTable.SymbolTable;
 import FrontEnd.Syntax.Parser;
 import FrontEnd.Lexicon.Scanner;
+import Global.Errors.ErrorHandler;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,30 +12,37 @@ import java.nio.file.Paths;
 
 public class Main {
     public static void main(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            ErrorHandler.reportError("Error interno inesperado: " + e.getMessage());
+            System.exit(1);
+        });
 
         Path codePath = Paths.get("src/Files/Examples/code.smpl");
-
         String codeContent = "";
-
         try {
             codeContent = Files.readString(codePath);
         } catch (IOException e) {
-            System.err.println("Error reading the file: " + e.getMessage());
-            return;
+            ErrorHandler.reportError("No se pudo leer el fichero: " + e.getMessage());
+            System.exit(1);
         }
 
         String pureCode = Preprocessor.removeComments(codeContent);
-
         Scanner scanner = new Scanner(pureCode);
         Parser parser = new Parser(scanner);
-
         try {
             parser.parse();
         } catch (Exception e) {
-            System.err.println("Error parsing the code: " + e.getMessage());
+            ErrorHandler.reportError("Error al parsear el código: " + e.getMessage());
+            System.exit(1);
         }
 
-        SymbolTable symbolTable = new SymbolTable();
-        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser.getParseTreeRoot());
+        try {
+            SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser.getParseTreeRoot());
+        } catch (Exception e) {
+            ErrorHandler.reportError("Error en análisis semántico: " + e.getMessage());
+            System.exit(1);
+        }
+
+        System.out.println("Análisis completado con éxito.");
     }
 }
