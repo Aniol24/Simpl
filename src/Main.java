@@ -18,7 +18,9 @@ public class Main {
         });
 
         Path codePath = Paths.get("src/Files/Examples/code.smpl");
+
         String codeContent = "";
+
         try {
             codeContent = Files.readString(codePath);
         } catch (IOException e) {
