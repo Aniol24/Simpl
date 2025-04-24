@@ -1,4 +1,9 @@
-package Syntax;
+package FrontEnd.Syntax;
+
+import Global.Errors.ErrorHandler;
+import Global.Errors.SimplException;
+import Global.Errors.SimplException.Type;
+
 
 import com.google.gson.*;
 
@@ -19,39 +24,42 @@ public class ParsingTable {
         parsingTable = new HashMap<>();
         try {
             createTable();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (SimplException e) {
+            ErrorHandler.reportError("No such file or directory for grammar: " + e.getMessage());
+            System.exit(1);
         }
         printTable(parsingTable);
     }
 
-    public void createTable() throws FileNotFoundException {
-        Gson gson = new Gson();
-        Rule[] grammar = gson.fromJson(new FileReader("src/JSON Files/gramatica.json"), Rule[].class);
-        JsonObject firstFollow = gson.fromJson(new FileReader("src/JSON Files/first_and_follow.json"), JsonObject.class);
-        JsonObject firstMap = firstFollow.getAsJsonObject("first");
-        JsonObject followMap = firstFollow.getAsJsonObject("follow");
+    public void createTable() throws SimplException {
+        try {
+            Gson gson = new Gson();
+            Rule[] grammar = gson.fromJson(new FileReader("src/Files/JSON/gramatica.json"), Rule[].class);
+            JsonObject firstFollow = gson.fromJson(new FileReader("src/Files/JSON/first_and_follow.json"), JsonObject.class);
+            JsonObject firstMap = firstFollow.getAsJsonObject("first");
+            JsonObject followMap = firstFollow.getAsJsonObject("follow");
 
-        for (Rule rule : grammar) {
-            for (List<String> production : rule.tokens) {
-                Set<String> firstSet = computeFirst(production, firstMap);
+            for (Rule rule : grammar) {
+                for (List<String> production : rule.tokens) {
+                    Set<String> firstSet = computeFirst(production, firstMap);
 
-                // Para cada terminal del conjunto FIRST (excepto EPSILON) se inserta la producción
-                for (String terminal : firstSet) {
-                    if (!terminal.equals("EPSILON")) {
-                        insert(parsingTable, rule.name, terminal, production);
+                    for (String terminal : firstSet) {
+                        if (!terminal.equals("EPSILON")) {
+                            insert(parsingTable, rule.name, terminal, production);
+                        }
                     }
-                }
 
-                // Si la producción es anulable, se insertan las producciones para cada terminal del FOLLOW
-                if (firstSet.contains("EPSILON")) {
-                    JsonArray followArray = followMap.getAsJsonArray(rule.name);
-                    for (JsonElement el : followArray) {
-                        String follow = el.getAsString();
-                        insert(parsingTable, rule.name, follow, production);
+                    if (firstSet.contains("EPSILON")) {
+                        JsonArray followArray = followMap.getAsJsonArray(rule.name);
+                        for (JsonElement el : followArray) {
+                            String follow = el.getAsString();
+                            insert(parsingTable, rule.name, follow, production);
+                        }
                     }
                 }
             }
+        } catch (FileNotFoundException e) {
+            throw new SimplException(Type.GRAMMAR, -1, "Fichero de grámatica o FIRST/FOLLOW no encontrado: " + e.getMessage());
         }
     }
 
@@ -59,29 +67,24 @@ public class ParsingTable {
         Set<String> result = new HashSet<>();
         boolean allNullable = true;
 
-        // Recorremos cada símbolo de la secuencia
         for (String symbol : sequence) {
             Set<String> firstSymbol = new HashSet<>();
 
-            // Si el símbolo es un no terminal (tiene entrada en firstMap)
             if (firstMap.has(symbol)) {
                 JsonArray arr = firstMap.getAsJsonArray(symbol);
                 for (JsonElement el : arr) {
                     firstSymbol.add(el.getAsString());
                 }
-                // Se añaden al resultado todos los elementos excepto EPSILON
                 for (String s : firstSymbol) {
                     if (!s.equals("EPSILON")) {
                         result.add(s);
                     }
                 }
-                // Si el símbolo no es anulable, dejamos de procesar la secuencia
                 if (!firstSymbol.contains("EPSILON")) {
                     allNullable = false;
                     break;
                 }
             } else {
-                // Si el símbolo es terminal, se añade y se detiene el proceso
                 result.add(symbol);
                 allNullable = false;
                 break;
