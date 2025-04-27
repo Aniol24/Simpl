@@ -37,7 +37,7 @@ public class SemanticAnalyzer {
         boolean scopeEntered = false;
         String nodeValue = node.getValue();
 
-       if ("IF_STMT".equals(nodeValue) || "ELIF_BLOCK".equals(nodeValue) || "ELSE_BLOCK".equals(nodeValue)
+       if ("IF_STATEMENT".equals(nodeValue) || "ELIF_BLOCKS".equals(nodeValue) || "ELSE_BLOCK".equals(nodeValue)
                 || "WHILE_LOOP".equals(nodeValue) || "FOR_LOOP".equals(nodeValue) || "UNTIL_LOOP".equals(nodeValue)) {
             if (hasStartEnd(node)) {
                 symbolTable.enterScope(nodeValue + "_scope@" + node.getToken().getLine());
@@ -58,20 +58,62 @@ public class SemanticAnalyzer {
             case "DECLARATION":
                 analyzeDeclaration(node);
                 break;
-            case "ID_INSTRUCTION":
+            case "INSTRUCTION":
+                TreeNode decl = findNode(node, "DECLARATION");
+                if (decl != null) {
+                    analyzeDeclaration(decl);
+                    break;
+                }
+                TreeNode ret = findNode(node, "RETURN_STATEMENT");
+                if (ret != null) {
+                    analyzeReturnStatement(ret);
+                    break;
+                }
+                TreeNode cond = findNode(node,"CONDITIONAL");
+                if (cond!=null) {
+                    analyzeNode(cond);
+                    break;
+                }
                 analyzeIdInstruction(node);
+                break;
+            case "CONDITIONAL":
+                TreeNode ifStmt = findNode(node,"IF_STATEMENT");
+                if (ifStmt != null) {
+                    analyzeNode(ifStmt);
+                }
+                TreeNode elifStmt = findNode(node,"ELIF_BLOCKS");
+                if (elifStmt != null && findNode(elifStmt, "ELIF") != null) {
+                    analyzeNode(elifStmt);
+                }
+                TreeNode elStmt = findNode(node,"ELSE_BLOCK");
+                if (elStmt != null && findNode(elStmt, "ELSE") != null) {
+                    analyzeNode(elStmt);
+                }
                 break;
             case "RETURN_STATEMENT":
                 analyzeReturnStatement(node);
                 break;
-            case "IF_STMT":
-            case "ELIF_BLOCK":
+            case "IF_STATEMENT":
+            case "ELIF_BLOCKS":
+            case "ELSE_BLOCK":
             case "WHILE_LOOP":
             case "UNTIL_LOOP":
                 analyzeConditionalOrLoop(node);
                 break;
             case "FOR_LOOP":
                 analyzeForLoop(node);
+                break;
+            case "EVAL":
+                analyzeEval(node);
+                break;
+            case "EXPR":
+                analyzeExpr(node);
+                break;
+            case "TERM":
+                analyzeTerm(node);
+                break;
+            case "FACTOR":
+                analyzeFactor(node);
                 break;
             default:
                 for (TreeNode child : node.getChildren()) {
@@ -83,6 +125,23 @@ public class SemanticAnalyzer {
         if (scopeEntered) {
             symbolTable.exitScope();
         }
+    }
+
+    private void checkFunctionCall(TreeNode callNode) {
+        TreeNode idNode = findNode(callNode, "ID");
+        String name = idNode.getAttribute();
+        int line = idNode.getToken().getLine();
+
+        Symbol symbol = symbolTable.lookupSymbol(name);
+        if (symbol == null) {
+            reportError(line, "Function '" + name + "' not declared.");
+            return;
+        }
+        if (!symbol.isFunction()) {
+            reportError(line, "'" + name + "' is not a function.");
+            return;
+        }
+        analyzeFunctionCallArgs(callNode, symbol);
     }
 
     private boolean hasStartEnd(TreeNode node) {
@@ -127,7 +186,7 @@ public class SemanticAnalyzer {
     }
 
 
-    private Symbol declareFunctionSignature(TreeNode funcNode) {
+    private void declareFunctionSignature(TreeNode funcNode) {
         TreeNode fnTokenNode = findNode(funcNode, "FN");
         TreeNode funcPrimeNode;
         TreeNode idNode = null;
@@ -156,7 +215,7 @@ public class SemanticAnalyzer {
             line = getLine(mainNode);
         } else {
             reportError(getLine(funcNode), "Function definition missing ID or MAIN node within expected FN -> FUNCTION_PRIME structure.");
-            return null;
+            return;
         }
 
         List<Symbol> parameters = extractParameters(funcNode);
@@ -167,10 +226,9 @@ public class SemanticAnalyzer {
         if (!globalScope.declareSymbol(funcSymbol)) {
             Symbol existing = globalScope.lookupSymbol(funcName);
             reportError(line, "Function '" + funcName + "' already declared globally at line " + (existing != null ? existing.getLineNumber() : "?"));
-            return null;
+            return;
         }
         System.out.println("Successfully declared function signature: " + funcSymbol);
-        return funcSymbol;
     }
 
 
@@ -196,7 +254,7 @@ public class SemanticAnalyzer {
 
         TreeNode codeBlock = findCodeBlock(funcNode);
         if(codeBlock != null) {
-            analyzeNode(codeBlock);
+            analyzeCodeBlock(codeBlock);
         } else {
             reportError(getLine(funcNode), "Function '" + funcSymbol.getName() + "' is missing its code block (START...END).");
         }
@@ -226,7 +284,7 @@ public class SemanticAnalyzer {
 
         TreeNode codeBlock = findCodeBlock(mainFuncNode);
         if (codeBlock != null) {
-            analyzeNode(codeBlock);
+            analyzeCodeBlock(codeBlock);
         } else {
             reportError(getLine(mainFuncNode), "Main function is missing its code block (START...END).");
         }
@@ -318,11 +376,17 @@ public class SemanticAnalyzer {
             }
         }
 
+        Symbol existing = symbolTable.lookupSymbol(varName);
+        if (existing != null) {
+            reportError(line, "Variable '" + varName + "' already declared in an outer scope at line " + existing.getLineNumber());
+            return;
+        }
+
         Symbol varSymbol = new Symbol(varName, varType, line);
         varSymbol.setInitialized(isInitialized);
         if (!symbolTable.declareSymbol(varSymbol)) {
-            Symbol existing = symbolTable.getCurrentScope().lookupSymbol(varName);
-            reportError(line, "Variable '" + varName + "' already declared in this scope at line " + (existing != null ? existing.getLineNumber() : "?"));
+            Symbol existingCurr = symbolTable.getCurrentScope().lookupSymbol(varName);
+            reportError(line, "Variable '" + varName + "' already declared in this scope at line " + (existingCurr != null ? existingCurr.getLineNumber() : "?"));
         }
     }
 
@@ -380,13 +444,12 @@ public class SemanticAnalyzer {
             }
 
         } else if (funcCallNode != null) {
-            // Function Call (ID (<args>))
             if (!symbol.isFunction()) {
-                reportError(line, "'" + name + "' is a variable, not a function, cannot call it.");
-                return;
+                reportError(line, "'" + name + "' is not a function, cannot call it.");
+            } else {
+                analyzeFunctionCallArgs(funcCallNode, symbol);
             }
-            analyzeFunctionCallArgs(funcCallNode, symbol);
-
+            return;
         } else {
             reportError(getLine(instructionPrimeNode), "Instruction after identifier '" + name + "' is neither assignment nor function call.");
         }
@@ -401,7 +464,7 @@ public class SemanticAnalyzer {
 
         TreeNode codeBlock = findCodeBlock(node);
         if(codeBlock != null) {
-            analyzeNode(codeBlock);
+            analyzeCodeBlock(codeBlock);
         } else if (hasStartEnd(node)){
             reportError(getLine(node), "Missing code block in " + node.getValue() + " statement.");
         }
@@ -458,7 +521,7 @@ public class SemanticAnalyzer {
 
         TreeNode codeBlock = findCodeBlock(forNode);
         if(codeBlock != null) {
-            analyzeNode(codeBlock);
+            analyzeCodeBlock(codeBlock);
         } else {
             reportError(getLine(forNode), "Missing code block in for loop.");
         }
@@ -734,17 +797,21 @@ public class SemanticAnalyzer {
             }
         }
     }
-    private List<TreeNode> findAllEvals(TreeNode node) {
-        List<TreeNode> out = new ArrayList<>();
-        if (node == null) return out;
-        if ("EVAL".equals(node.getValue())) out.add(node);
-        for (TreeNode c : node.getChildren()) {
-            out.addAll(findAllEvals(c));
-        }
-        return out;
-    }
     private List<TreeNode> findArgumentExpressions(TreeNode callArgsNode) {
-        return findAllEvals(callArgsNode);
+        List<TreeNode> args = new ArrayList<>();
+        TreeNode argList = findNode(callArgsNode, "ARG_LIST");
+        if (argList == null) return args;
+
+        TreeNode firstEval = findNode(argList, "EVAL");
+        if (firstEval != null) args.add(firstEval);
+
+        TreeNode next = findNode(argList, "NEXT_ARG");
+        while (next != null) {
+            TreeNode eval = findNode(next, "EVAL");
+            if (eval != null) args.add(eval);
+            next = findNode(next, "NEXT_ARG");
+        }
+        return args;
     }
 
     private String extractType(TreeNode varTypeNode) {
@@ -820,6 +887,20 @@ public class SemanticAnalyzer {
         }
         return null;
     }
+
+    private void analyzeCodeBlock(TreeNode code) {
+        for (TreeNode stmt : code.getChildren()) {
+            if ("DECLARATION".equals(stmt.getValue())) {
+                analyzeDeclaration(stmt);
+            }
+        }
+        for (TreeNode stmt : code.getChildren()) {
+            if (!"DECLARATION".equals(stmt.getValue())) {
+                analyzeNode(stmt);
+            }
+        }
+    }
+
 
     private TreeNode findCodeBlock(TreeNode parent) {
         TreeNode startNode = findNode(parent, "START");
