@@ -1,0 +1,9 @@
+##
+en este codigo se testea que no se pueda usar una variable no declarada
+##
+
+fn main:
+    a = 4
+    int -> b = a
+
+    return

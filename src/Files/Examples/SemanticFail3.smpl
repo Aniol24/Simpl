@@ -1,0 +1,17 @@
+##
+en este codigo se testea:
+    * que no se llame a una variable no declarada
+    * que una funcion no devuelva un int, si ha sido declarada como void
+    * que no se puedan pasar un numero incorrecto de parametros
+##
+
+fn defined(int -> d) -> int:
+    return d + 1
+
+fn returnVoid(int -> f, int -> h):
+    return f + h
+
+fn main:
+    int -> b = defined(a)
+    returnVoid(b)
+    return
