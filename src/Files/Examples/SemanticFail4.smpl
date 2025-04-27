@@ -1,0 +1,15 @@
+##
+en este codgio se testea:
+    * que no se puedan declarar globales
+    * que no se puedan asignar valores a variables que no son de ese tipo (asignar chr a int o int a chr)
+    * que no se permitan hacer operaciones aritmeticas entre variables de tipos distintos
+##
+
+int -> global = 3
+
+fn main:
+    int -> a = 'n'
+    chr -> n = 5
+    int -> b = 6
+    int -> c = b + n
+    return

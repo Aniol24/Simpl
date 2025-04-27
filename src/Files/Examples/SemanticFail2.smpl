@@ -1,0 +1,9 @@
+##
+en este codigo se testea que no se pueda llamar a una funcion no declarada
+##
+
+fn main:
+    int -> a = 3
+    nonDefined(a)
+
+    return

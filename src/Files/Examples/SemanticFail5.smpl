@@ -1,0 +1,10 @@
+##
+en este codigo se testea que no se puedan declarar variables ya declaradas en scopes
+mas exteriores al que me encuentro
+##
+
+fn main:
+    int -> a = 7
+    if (a == 7):
+        int -> a = 9
+    return
