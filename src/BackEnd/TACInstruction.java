@@ -64,10 +64,10 @@ public class TACInstruction {
             case "EQUALS":     // ya lo tenías para "=="
                 return "EQUALS";
             case "NOT_EQUAL":  return "NOT_EQUAL";// nuevo para "!="
-            case "LT":         return "<";
-            case "GT":         return ">";
-            case "LE":         return "<=";
-            case "GE":         return ">=";
+            case "LOWER":         return "LOWER";
+            case "GREATER":         return "GREATER";
+            case "LOWER_EQUAL":         return "LOWER_EQUAL";
+            case "GREATER_EQUAL":         return "GREATER_EQUAL";
             default:           return null;
         }
     }

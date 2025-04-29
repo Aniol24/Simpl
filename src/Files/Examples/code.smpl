@@ -1,6 +1,7 @@
 fn main:
-    if (1 == 1):
-        if( 1 == 2):
-            int -> a
-        if( 2 == 2):
-            int -> b
+    int -> x = 5
+    int -> y = 10
+    if (x > 0):
+        if (y <= x):
+            y = y - x
+    return

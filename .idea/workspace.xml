@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="TAC funciona parcialment (falta testing)">
+    <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="millores en generacio TAC">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/BackEnd/CodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/CodeGenerator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/BackEnd/TACInstruction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/TACInstruction.java" afterDir="false" />
@@ -144,7 +144,7 @@
       <workItem from="1745501144616" duration="1417000" />
       <workItem from="1745829773427" duration="2658000" />
       <workItem from="1745832819224" duration="1510000" />
-      <workItem from="1745934125551" duration="10845000" />
+      <workItem from="1745934125551" duration="12068000" />
     </task>
     <task id="LOCAL-00001" summary="Versió 21 SDK">
       <option name="closed" value="true" />
@@ -186,7 +186,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745942003045</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="millores en generacio TAC">
+      <option name="closed" value="true" />
+      <created>1745950607205</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1745950607205</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -219,7 +227,8 @@
     <MESSAGE value="Versió 21 SDK" />
     <MESSAGE value="Neteja" />
     <MESSAGE value="TAC funciona parcialment (falta testing)" />
-    <option name="LAST_COMMIT_MESSAGE" value="TAC funciona parcialment (falta testing)" />
+    <MESSAGE value="millores en generacio TAC" />
+    <option name="LAST_COMMIT_MESSAGE" value="millores en generacio TAC" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

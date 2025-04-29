@@ -408,42 +408,53 @@ public class CodeGenerator {
     }
 
     private String generateFactor(TreeNode f) {
+        // NUEVO: si no hay hijos, devolvemos cadena vacía
+        if (f.getChildren() == null || f.getChildren().isEmpty()) {
+            return "";
+        }
+
+        // 1) Detección de llamada a función anidada
         if ("FACTOR".equals(f.getValue())
                 && f.getChildren().size() > 1
                 && "FACTOR_PRIME".equals(f.getChildren().get(1).getValue())) {
             TreeNode fp = f.getChildren().get(1);
             if (!fp.getChildren().isEmpty()
                     && "FUNCTION_CALL".equals(fp.getChildren().get(0).getValue())) {
-
-                TreeNode fc = fp.getChildren().get(0);
-                String fn = f.getChildren().get(0).getAttribute();
+                // …emitParams + call…
+                TreeNode fc      = fp.getChildren().get(0);
+                String   fn      = f.getChildren().get(0).getAttribute();
                 TreeNode argList = fc.getChildren().get(1);
-
                 emitParams(argList);
-
                 String temp = newTemp();
                 emit("call", fn, null, temp);
                 return temp;
             }
         }
 
+        // 2) Ahora ya sabemos que f tiene al menos un hijo
         TreeNode first = f.getChildren().get(0);
-        String kind = first.getValue();
+        String kind    = first.getValue();
+
         if ("LITERAL".equals(kind)) {
             String lit = first.getChildren().get(0).getAttribute();
-            if (lit.length() == 1) return "'" + lit + "'";
-            return lit;
-        } else if ("ID".equals(kind)) {
+            return lit.length()==1 ? "'" + lit + "'" : lit;
+        }
+        else if ("ID".equals(kind)) {
             return first.getAttribute();
-        } else if ("PO".equals(kind)) {
+        }
+        else if ("PO".equals(kind)) {
+            // ( EVAL )
             for (TreeNode ch : f.getChildren()) {
                 if ("EVAL".equals(ch.getValue())) {
                     return generateExpr(ch.getChildren().get(0));
                 }
             }
         }
+
+        // 3) Caso genérico: deshacemos un nivel
         return generateFactor(first);
     }
+
 
     private void emit(String op, String arg1, String arg2, String result) {
         code.add(new TACInstruction(op, arg1, arg2, result));
