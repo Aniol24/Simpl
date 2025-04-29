@@ -1,0 +1,11 @@
+##
+en este codigo se testea el else
+##
+
+fn main:
+    int -> a = 0
+    if (a == 9):
+        a = 0
+    else:
+        a = 5
+    return

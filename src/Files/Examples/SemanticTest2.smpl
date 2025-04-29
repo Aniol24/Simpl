@@ -1,0 +1,13 @@
+##
+en este codigo se testea el else if, y que se puedan concatenar bloques if, elif y else
+##
+
+fn main:
+    int -> a = 0
+    if (a == 9):
+        a = 0
+    elif (a == 0):
+        a = 5
+    else:
+        a = 7
+    return

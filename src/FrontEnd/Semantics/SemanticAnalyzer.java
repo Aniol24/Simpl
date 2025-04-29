@@ -34,6 +34,11 @@ public class SemanticAnalyzer {
             return;
         }
 
+        if ("INICIAL".equals(node.getValue())) {
+            analyzeProgram(node);
+            return;
+        }
+
         boolean scopeEntered = false;
         String nodeValue = node.getValue();
 
@@ -43,7 +48,7 @@ public class SemanticAnalyzer {
                 symbolTable.enterScope(nodeValue + "_scope@" + node.getToken().getLine());
                 scopeEntered = true;
             }
-        }
+       }
 
         switch (nodeValue) {
             case "ROOT":
@@ -74,6 +79,11 @@ public class SemanticAnalyzer {
                     analyzeNode(cond);
                     break;
                 }
+                TreeNode iter = findNode(node, "ITERATIVE");
+                if (iter != null) {
+                    analyzeNode(iter);
+                    break;
+                }
                 analyzeIdInstruction(node);
                 break;
             case "CONDITIONAL":
@@ -93,9 +103,16 @@ public class SemanticAnalyzer {
             case "RETURN_STATEMENT":
                 analyzeReturnStatement(node);
                 break;
+            case "ELSE_BLOCK":
+                TreeNode elseCode = findCodeBlock(node);
+                if (elseCode != null) {
+                    analyzeCodeBlock(elseCode);
+                } else {
+                    reportError(getLine(node), "Missing code block in ELSE statement.");
+                }
+                break;
             case "IF_STATEMENT":
             case "ELIF_BLOCKS":
-            case "ELSE_BLOCK":
             case "WHILE_LOOP":
             case "UNTIL_LOOP":
                 analyzeConditionalOrLoop(node);
@@ -125,23 +142,6 @@ public class SemanticAnalyzer {
         if (scopeEntered) {
             symbolTable.exitScope();
         }
-    }
-
-    private void checkFunctionCall(TreeNode callNode) {
-        TreeNode idNode = findNode(callNode, "ID");
-        String name = idNode.getAttribute();
-        int line = idNode.getToken().getLine();
-
-        Symbol symbol = symbolTable.lookupSymbol(name);
-        if (symbol == null) {
-            reportError(line, "Function '" + name + "' not declared.");
-            return;
-        }
-        if (!symbol.isFunction()) {
-            reportError(line, "'" + name + "' is not a function.");
-            return;
-        }
-        analyzeFunctionCallArgs(callNode, symbol);
     }
 
     private boolean hasStartEnd(TreeNode node) {
@@ -390,6 +390,31 @@ public class SemanticAnalyzer {
         }
     }
 
+    private boolean checkForwardCall(String name, int callLine, Symbol sym) {
+        if (!sym.isFunction()) {
+            reportError(callLine, "'" + name + "' is not a function, cannot call it.");
+            return false;
+        }
+        int declLine = sym.getLineNumber();
+        if (callLine < declLine) {
+            reportError(callLine, "Function '" + name + "' called in line " + callLine + " before its declaration in line " + declLine + ".");
+            return false;
+        }
+        return true;
+    }
+
+    private void analyzeFunctionCall(TreeNode idNode, TreeNode callNode) {
+        String name = idNode.getAttribute();
+        int line = getLine(idNode);
+        Symbol sym = symbolTable.lookupSymbol(name);
+        if (sym == null) {
+            reportError(line, "Function '" + name + "' not declared.");
+            return;
+        }
+        if (!checkForwardCall(name, line, sym)) return;
+        analyzeFunctionCallArgs(callNode, sym);
+    }
+
     private void analyzeIdInstruction(TreeNode idInstrNode) {
         TreeNode idNode = findNode(idInstrNode, "ID");
         TreeNode instructionPrimeNode = findNode(idInstrNode, "INSTRUCTION_PRIME");
@@ -418,8 +443,8 @@ public class SemanticAnalyzer {
                 return;
             }
 
-            TreeNode incNode = findNode(assignmentNode, "INCREMENT");
-            TreeNode decNode = findNode(assignmentNode, "DECREMENT");
+            TreeNode incNode = findNode(assignmentNode, "INC");
+            TreeNode decNode = findNode(assignmentNode, "DEC");
             TreeNode eqNode   = findNode(assignmentNode, "EQ");
             TreeNode exprNode = findNode(assignmentNode, "EXPR");
 
@@ -447,7 +472,7 @@ public class SemanticAnalyzer {
             if (!symbol.isFunction()) {
                 reportError(line, "'" + name + "' is not a function, cannot call it.");
             } else {
-                analyzeFunctionCallArgs(funcCallNode, symbol);
+                analyzeFunctionCall(idNode, funcCallNode);
             }
             return;
         } else {
@@ -712,7 +737,7 @@ public class SemanticAnalyzer {
                         reportError(line, "'" + name + "' is not a function and cannot be called.");
                         return null;
                     }
-                    analyzeFunctionCallArgs(funcCallNode, symbol);
+                    analyzeFunctionCall(firstChild, funcCallNode);
                     return symbol.getReturnType();
                 } else {
                     if (symbol.isFunction()) {
