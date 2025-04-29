@@ -1,25 +1,11 @@
-fn sum(int -> a, int -> b) -> int:
-    return a + b
+fn prova -> int:
+    return 4
 
-fn sub(int -> a, int -> b) -> int:
-    return a - b
-
-fn mult(int -> a, int -> b) -> int:
-    return a * b
-
-fn div(int -> a, int -> b) -> int:
-    return a / b
-
-##
-Funcio main
-##
+fn hola(int->c)->int:
+    return c + 3
 
 fn main:
-    int -> a = 4
-    int -> b = 5
 
-    int -> c = sum(a, b)
-    int -> d = sub(c, a)
+    int -> a = 3
 
-    b = mult(d, a)
-    a = div(b, sum(d, c))
+    a = prova()

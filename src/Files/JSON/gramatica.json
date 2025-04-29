@@ -73,11 +73,11 @@
   },
   {
     "name": "FUNCTION_CALL",
-    "tokens": [["ARG_LIST"]]
+    "tokens": [["PO","ARG_LIST","PT"]]
   },
   {
     "name": "ARG_LIST",
-    "tokens": [["PO", "EVAL", "NEXT_ARG", "PT"], ["EPSILON"]]
+    "tokens": [["EVAL", "NEXT_ARG"], ["EPSILON"]]
   },
   {
     "name": "NEXT_ARG",
