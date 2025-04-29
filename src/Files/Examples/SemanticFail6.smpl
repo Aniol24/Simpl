@@ -1,0 +1,13 @@
+##
+en este codigo se testea si detecta el error de llamar a una funcion antes de su declaracion, linealmente
+##
+
+fn main:
+    int -> a = 0
+    int -> b = hola(a)
+    return
+
+fn hola (int -> a) -> int:
+    int -> c = 0
+    a = 4
+    return a
