@@ -1,0 +1,10 @@
+fn max(int -> a, int -> b, int -> c) -> int:
+    if (a >= b & a >= c):
+        return a
+    if (b >= c):
+        return b
+    return c
+
+fn main:
+    int -> result = max(3, 7, 5)
+    return

@@ -1,0 +1,8 @@
+fn is_positive(int -> n) -> bl:
+    return n > 0
+
+fn main:
+    int -> x = 5
+    if (is_positive(x)):
+        x = 1
+    return

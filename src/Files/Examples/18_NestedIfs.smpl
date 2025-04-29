@@ -1,0 +1,7 @@
+fn main:
+    int -> x = 5
+    int -> y = 10
+    if (x > 0):
+        if (y > x):
+            y = y - x
+    return

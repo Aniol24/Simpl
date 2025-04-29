@@ -1,0 +1,6 @@
+fn main:
+    chr -> c1 = 'A'
+    chr -> c2 = 'B'
+    if (c1 != c2):
+        c1 = c2
+    return

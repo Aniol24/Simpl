@@ -1,0 +1,3 @@
+fn main:
+    flt -> f = 3.14
+    return

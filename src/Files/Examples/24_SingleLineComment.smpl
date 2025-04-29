@@ -1,0 +1,4 @@
+fn main:
+    # This is a single line comment
+    int -> x = 1
+    return
