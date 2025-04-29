@@ -1,0 +1,5 @@
+fn main:
+    int -> x = 5
+    loop while (x > 0):
+        x = x - 1
+    return

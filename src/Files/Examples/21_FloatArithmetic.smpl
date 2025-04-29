@@ -1,0 +1,4 @@
+fn main:
+    flt -> x = 2.5
+    flt -> y = x * 2.0
+    return

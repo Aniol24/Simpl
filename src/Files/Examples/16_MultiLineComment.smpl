@@ -1,0 +1,9 @@
+fn main:
+    ## This
+    is
+    a
+    multi-line
+    comment
+    example ##
+    int -> x = 1
+    return

@@ -1,0 +1,6 @@
+fn do_nothing -> int:
+    return 0
+
+fn main:
+    int -> result = do_nothing()
+    return
