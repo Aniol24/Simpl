@@ -1,11 +1,6 @@
-fn prova -> int:
-    return 4
-
-fn hola(int->c)->int:
-    return c + 3
-
 fn main:
-
-    int -> a = 3
-
-    a = prova()
+    if (1 == 1):
+        if( 1 == 2):
+            int -> a
+        if( 2 == 2):
+            int -> b

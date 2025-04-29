@@ -58,7 +58,7 @@ public class TACInstruction {
         switch (op) {
             case "SUM":        return "+";
             case "SUB":        return "-";
-            case "MUL":        return "*";
+            case "MULT":        return "*";
             case "DIV":        return "/";
             case "EQ":         // si tu gramática emite "EQ"
             case "EQUALS":     // ya lo tenías para "=="

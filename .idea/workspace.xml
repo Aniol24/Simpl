@@ -4,17 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="Neteja">
-      <change afterPath="$PROJECT_DIR$/src/BackEnd/CodeGenerator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/BackEnd/TACInstruction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Utils/analitzadorGramatica.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="TAC funciona parcialment (falta testing)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BackEnd/CodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/CodeGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BackEnd/TACInstruction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/TACInstruction.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/Examples/code.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/code.smpl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/JSON/first_and_follow.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/JSON/first_and_follow.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/JSON/gramatica.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/JSON/gramatica.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/JSON/terminals_and_nonterminals.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/JSON/terminals_and_nonterminals.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -150,7 +144,7 @@
       <workItem from="1745501144616" duration="1417000" />
       <workItem from="1745829773427" duration="2658000" />
       <workItem from="1745832819224" duration="1510000" />
-      <workItem from="1745934125551" duration="7743000" />
+      <workItem from="1745934125551" duration="10845000" />
     </task>
     <task id="LOCAL-00001" summary="Versió 21 SDK">
       <option name="closed" value="true" />
@@ -184,7 +178,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745502288445</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="TAC funciona parcialment (falta testing)">
+      <option name="closed" value="true" />
+      <created>1745942003045</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1745942003045</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -216,7 +218,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Versió 21 SDK" />
     <MESSAGE value="Neteja" />
-    <option name="LAST_COMMIT_MESSAGE" value="Neteja" />
+    <MESSAGE value="TAC funciona parcialment (falta testing)" />
+    <option name="LAST_COMMIT_MESSAGE" value="TAC funciona parcialment (falta testing)" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
