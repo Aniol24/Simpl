@@ -30,49 +30,51 @@ public class TACInstruction {
         }
         // 5) Call with return
         if ("call".equals(op)) {
-            if(result == null){
+            if (result == null || result.isEmpty()) { // Check if result is effectively null or empty
                 return "call " + arg1;
-            }else{
+            } else {
                 return result + " = call " + arg1;
             }
-
         }
         // 6) Return
         if ("return".equals(op)) {
-            return "return " + arg1;
+            return (arg1 != null ? "return " + arg1 : "return"); // Handle return with no value
         }
         // 7) Simple assignment
         if ("=".equals(op)) {
             return result + " = " + arg1;
         }
-        // 8) Binary operations and comparisons
+        // 8) Unary operations
+        if ("NOT".equals(op)) {
+            return result + " = NOT " + arg1;
+        }
+        // 9) Binary operations and comparisons
         String sym = mapSymbol(op);
         if (sym != null) {
             return result + " = " + arg1 + " " + sym + " " + arg2;
         }
-        // 9) Error si queda algo sin mapear
-        throw new IllegalStateException("Operación desconocida en TAC: " + op);
+        // 10) Error si queda algo sin mapear
+        System.err.println("Operación desconocida en TACInstruction.toString(): " + op); // Log error
+        return String.format("%s = %s %s %s (Unknown OP: %s)", result, arg1, op, arg2, op); // Fallback representation
     }
 
     private String mapSymbol(String op) {
         switch (op) {
-            case "SUM":        return "+";
-            case "SUB":        return "-";
-            case "MULT":        return "*";
-            case "DIV":        return "/";
-            case "EQ":         // si tu gramática emite "EQ"
-            case "EQUALS":     // ya lo tenías para "=="
-                return "EQUALS";
-            case "NOT_EQUAL":  return "NOT_EQUAL";// nuevo para "!="
-            case "LOWER":         return "LOWER";
-            case "GREATER":         return "GREATER";
-            case "LOWER_EQUAL":         return "LOWER_EQUAL";
-            case "GREATER_EQUAL":         return "GREATER_EQUAL";
-            default:           return null;
+            case "SUM": return "+";
+            case "SUB": return "-";
+            case "MULT": return "*";
+            case "DIV": return "/";
+            case "MOD": return "%"; // Added MOD
+            case "EQ": // Fallthrough
+            case "EQUALS": return "=="; // Using == for clarity, adjust if TAC interpreter expects "EQUALS"
+            case "NOT_EQUAL": return "!=";
+            case "LOWER": return "<";
+            case "GREATER": return ">";
+            case "LOWER_EQUAL": return "<=";
+            case "GREATER_EQUAL": return ">=";
+            case "AND": return "&&"; // Common symbols for logical ops
+            case "OR": return "||";
+            default: return null;
         }
     }
-
-
-
-
 }

@@ -139,7 +139,15 @@ public class CodeGenerator {
                 generateIf(inst.getChildren().get(0));
                 break;
             case "ITERATIVE":
-                generateWhile(inst.getChildren().get(0));
+                // Assuming WHILE_LOOP is the primary one handled, add FOR, UNTIL if needed
+                TreeNode loopTypeNode = inst.getChildren().get(0).getChildren().get(0);
+                if ("WHILE_LOOP".equals(loopTypeNode.getValue())) {
+                    generateWhile(loopTypeNode);
+                } else if ("FOR_LOOP".equals(loopTypeNode.getValue())) {
+                    // generateFor(loopTypeNode); // TODO: Implement if needed
+                } else if ("UNTIL_LOOP".equals(loopTypeNode.getValue())) {
+                    // generateUntil(loopTypeNode); // TODO: Implement if needed
+                }
                 break;
             case "ID": {
                 TreeNode prime = inst.getChildren().get(1);
@@ -156,11 +164,11 @@ public class CodeGenerator {
             case "RETURN_STATEMENT": {
                 TreeNode returnStmt = inst.getChildren().get(0);
                 TreeNode optEval = returnStmt.getChildren().get(1);
-                if (!optEval.getChildren().isEmpty()) {
+                if (!optEval.getChildren().isEmpty() && !"EPSILON".equals(optEval.getChildren().get(0).getValue())) {
                     TreeNode evalNode = optEval.getChildren().get(0);
                     generateReturn(evalNode);
                 } else {
-                    emit("return", null, null, null);
+                    emit("return", null, null, null); // Return without value
                 }
                 break;
             }
@@ -169,17 +177,16 @@ public class CodeGenerator {
         }
     }
 
-    private void generateWhile(TreeNode iterNode) {
-        TreeNode whileLoop = iterNode.getChildren().stream()
-                .filter(c -> "WHILE_LOOP".equals(c.getValue()))
-                .findFirst().orElse(iterNode);
+    private void generateWhile(TreeNode whileLoopNode) {
         String startLbl = newLabel();
         String endLbl = newLabel();
         emit("label", null, null, startLbl);
-        TreeNode evalNode = whileLoop.getChildren().get(2);
-        String condTemp = generateCondition(evalNode);
+
+        TreeNode evalNode = whileLoopNode.getChildren().get(2); // WHILE PO EVAL PT START CODE END
+        String condTemp = generateEvalExpr(evalNode);
         emit("ifFalse", condTemp, null, endLbl);
-        TreeNode codeNode = whileLoop.getChildren().get(5);
+
+        TreeNode codeNode = whileLoopNode.getChildren().get(5);
         processCode(codeNode);
         emit("goto", null, null, startLbl);
         emit("label", null, null, endLbl);
@@ -191,42 +198,60 @@ public class CodeGenerator {
                 .findFirst().orElse(null);
         if (ifStmt == null) return;
 
-        TreeNode evalNode = ifStmt.getChildren().stream()
+        TreeNode evalNode = ifStmt.getChildren().stream() // IF PO EVAL PT START CODE END
                 .filter(c -> "EVAL".equals(c.getValue()))
                 .findFirst().orElse(null);
-        String condTemp = generateCondition(evalNode);
+        String condTemp = generateEvalExpr(evalNode);
+
+        TreeNode elifBlocks = condNode.getChildren().stream()
+                .filter(c -> "ELIF_BLOCKS".equals(c.getValue()))
+                .findFirst().orElse(null);
 
         TreeNode elseBlock = condNode.getChildren().stream()
                 .filter(c -> "ELSE_BLOCK".equals(c.getValue()))
                 .findFirst().orElse(null);
+
+        String nextLabel = newLabel();
+        String endLabel = newLabel();
+
+        emit("ifFalse", condTemp, null, nextLabel);
+        ifStmt.getChildren().stream()
+                .filter(c -> "CODE".equals(c.getValue()))
+                .findFirst().ifPresent(this::processCode);
+        emit("goto", null, null, endLabel);
+
+        emit("label", null, null, nextLabel);
+
+        // Handle ELIF blocks
+        TreeNode currentElif = elifBlocks;
+        while (currentElif != null && !currentElif.getChildren().isEmpty() && !"EPSILON".equals(currentElif.getChildren().get(0).getValue())) {
+            // ELIF_BLOCKS -> ELIF PO EVAL PT START CODE END ELIF_BLOCKS
+            TreeNode elifEvalNode = currentElif.getChildren().get(2);
+            String elifCondTemp = generateEvalExpr(elifEvalNode);
+            
+            String nextElifOrElseLabel = newLabel();
+            emit("ifFalse", elifCondTemp, null, nextElifOrElseLabel);
+            
+            TreeNode elifCodeNode = currentElif.getChildren().get(5);
+            processCode(elifCodeNode);
+            emit("goto", null, null, endLabel);
+            
+            emit("label", null, null, nextElifOrElseLabel);
+            currentElif = currentElif.getChildren().get(7); // Next ELIF_BLOCKS
+        }
+        
+        // Handle ELSE block
         boolean hasElse = elseBlock != null
                 && !elseBlock.getChildren().isEmpty()
                 && !"EPSILON".equals(elseBlock.getChildren().get(0).getValue());
 
         if (hasElse) {
-            String elseLbl = newLabel();
-            String endLbl  = newLabel();
-
-            emit("ifFalse", condTemp, null, elseLbl);
-            ifStmt.getChildren().stream()
-                    .filter(c -> "CODE".equals(c.getValue()))
-                    .findFirst().ifPresent(this::processCode);
-            emit("goto", null, null, endLbl);
-
-            emit("label", null, null, elseLbl);
+            // ELSE START CODE END
             elseBlock.getChildren().stream()
                     .filter(c -> "CODE".equals(c.getValue()))
                     .findFirst().ifPresent(this::processCode);
-
-            emit("label", null, null, endLbl);
-        } else {
-            String endLbl = newLabel();
-            emit("ifFalse", condTemp, null, endLbl);
-            ifStmt.getChildren().stream()
-                    .filter(c -> "CODE".equals(c.getValue()))
-                    .findFirst().ifPresent(this::processCode);
-            emit("label", null, null, endLbl);
         }
+        emit("label", null, null, endLabel);
     }
 
 
@@ -258,118 +283,123 @@ public class CodeGenerator {
         return null;
     }
 
-    private void emitParams(TreeNode argList) {
-        for (TreeNode c: argList.getChildren()) {
-            if ("EVAL".equals(c.getValue())) {
-                String place = generateExpr(c.getChildren().get(0));
-                emit("param", place, null, null);
-            }
+    private String generateEvalExpr(TreeNode evalNode) {
+        if (evalNode == null || evalNode.getChildren().isEmpty()) {
+            System.err.println("Error: Empty EVAL node in generateEvalExpr.");
+            return newTemp(); // Return a dummy temp to avoid further errors
+        }
+        // EVAL -> EXPR EVAL_PRIME
+        TreeNode exprNode = evalNode.getChildren().get(0);
+        String currentPlace = generateExpr(exprNode);
+
+        TreeNode evalPrimeNode = evalNode.getChildren().size() > 1 ? evalNode.getChildren().get(1) : null;
+
+        while (evalPrimeNode != null && !evalPrimeNode.getChildren().isEmpty() &&
+               !"EPSILON".equals(evalPrimeNode.getChildren().get(0).getValue())) {
+            // EVAL_PRIME -> OP EXPR EVAL_PRIME'
+            String op = evalPrimeNode.getChildren().get(0).getValue();
+            TreeNode nextExprNode = evalPrimeNode.getChildren().get(1);
+            String rightPlace = generateExpr(nextExprNode);
+
+            String temp = newTemp();
+            emit(op, currentPlace, rightPlace, temp);
+            currentPlace = temp;
+
+            evalPrimeNode = evalPrimeNode.getChildren().size() > 2 ? evalPrimeNode.getChildren().get(2) : null;
+        }
+        return currentPlace;
+    }
+
+    private void emitParams(TreeNode argListNode) {
+        if (argListNode == null || argListNode.getChildren().isEmpty() || "EPSILON".equals(argListNode.getChildren().get(0).getValue())) {
+            return; // No arguments
+        }
+        // ARG_LIST -> EVAL NEXT_ARG
+        TreeNode evalNode = argListNode.getChildren().get(0);
+        String place = generateEvalExpr(evalNode); // Arguments are expressions
+        emit("param", place, null, null);
+
+        if (argListNode.getChildren().size() > 1) {
+            TreeNode nextArgNode = argListNode.getChildren().get(1);
+            emitNextParams(nextArgNode);
+        }
+    }
+
+    private void emitNextParams(TreeNode nextArgNode) {
+        if (nextArgNode == null || nextArgNode.getChildren().isEmpty() || "EPSILON".equals(nextArgNode.getChildren().get(0).getValue())) {
+            return; // No more arguments
+        }
+        // NEXT_ARG -> COMA EVAL NEXT_ARG
+        TreeNode evalNode = nextArgNode.getChildren().get(1); // After COMA
+        String place = generateEvalExpr(evalNode);
+        emit("param", place, null, null);
+
+        if (nextArgNode.getChildren().size() > 2) {
+            TreeNode nextNextArgNode = nextArgNode.getChildren().get(2);
+            emitNextParams(nextNextArgNode);
         }
     }
 
     private void generateDeclaration(TreeNode decl) {
-        String var  = decl.getChildren().get(2).getAttribute();
-        TreeNode init = decl.getChildren().get(3);
+        // VAR_TYPE ARROW ID INIT_OPT
+        String varName = decl.getChildren().get(2).getAttribute();
+        TreeNode initOptNode = decl.getChildren().get(3);
 
-        if (!init.getChildren().isEmpty()
-                && !"EPSILON".equals(init.getChildren().get(0).getValue())) {
-
-            TreeNode evalNode = init.getChildren().get(1);
-
-            TreeNode factor = findCallFactor(evalNode);
-            if (factor != null) {
-                String fn = factor.getChildren().get(0).getAttribute();
-                TreeNode funcCall = factor
-                        .getChildren().get(1)
-                        .getChildren().get(0);
-
-                TreeNode argList = funcCall.getChildren().get(1);
-
-                emitParams(argList);
-
-                String tmp = newTemp();
-                emit("call", fn,    null, tmp);
-                emit("=",    tmp,   null, var);
-                return;
-            }
-
-            TreeNode expr = evalNode.getChildren().get(0);
-            String place = generateExpr(expr);
-            emit("=", place, null, var);
+        if (!initOptNode.getChildren().isEmpty() && !"EPSILON".equals(initOptNode.getChildren().get(0).getValue())) {
+            // INIT_OPT -> EQ EVAL
+            TreeNode evalNode = initOptNode.getChildren().get(1);
+            String place = generateEvalExpr(evalNode);
+            emit("=", place, null, varName);
         }
     }
 
     private void generateAssignment(TreeNode inst) {
-        String var = inst.getChildren().get(0).getAttribute();
-        TreeNode assignmentNode = inst.getChildren().get(1)
-                .getChildren().get(0);
-        if (assignmentNode.getChildren().isEmpty()) return;
+        String varName = inst.getChildren().get(0).getAttribute(); // ID
+        TreeNode instructionPrimeNode = inst.getChildren().get(1);
+        TreeNode assignmentNode = instructionPrimeNode.getChildren().get(0); // ASSIGNMENT
 
-        String kind = assignmentNode.getChildren().get(0).getValue();
+        if (assignmentNode.getChildren().isEmpty()) return;
+        String kind = assignmentNode.getChildren().get(0).getValue(); // EQ, INC, DEC
+
         switch (kind) {
             case "EQ": {
+                // ASSIGNMENT -> EQ EXPR
                 TreeNode exprNode = assignmentNode.getChildren().get(1);
-
-                TreeNode callFactor = findCallFactor(exprNode);
-                if (callFactor != null) {
-                    String fn = callFactor.getChildren().get(0).getAttribute();
-                    TreeNode argList = callFactor
-                            .getChildren().get(1)
-                            .getChildren().get(0)
-                            .getChildren().get(0);
-
-                    for (TreeNode c : argList.getChildren()) {
-                        if ("EVAL".equals(c.getValue())) {
-                            String place = generateExpr(c.getChildren().get(0));
-                            emit("param", place, null, null);
-                        }
-                    }
-
-                    String temp = newTemp();
-                    emit("call", fn, null, temp);
-                    emit("=", temp, null, var);
-                    return;
-                }
-
-                String place = generateExpr(exprNode.getChildren().get(0));
-                emit("=", place, null, var);
+                String place = generateExpr(exprNode);
+                emit("=", place, null, varName);
                 break;
             }
-
             case "INC": {
-                String tInc = newTemp();
-                emit("SUM", var, "1", tInc);
-                emit("=", tInc, null, var);
+                String temp = newTemp();
+                emit("SUM", varName, "1", temp);
+                emit("=", temp, null, varName);
                 break;
             }
-
+            case "DEC": {
+                String temp = newTemp();
+                emit("SUB", varName, "1", temp);
+                emit("=", temp, null, varName);
+                break;
+            }
+            // Handle POW if necessary
             default:
+                System.err.println("Unhandled assignment kind: " + kind);
                 break;
         }
     }
 
     private void generateFunctionCall(TreeNode inst) {
-        String fn = inst.getChildren().get(0).getAttribute();
-
-        TreeNode callNode = inst.getChildren()
-                .get(1)
-                .getChildren().get(0);
-
-        TreeNode argList = callNode.getChildren().get(1);
-
-
-        for (TreeNode child : argList.getChildren()) {
-            if ("EVAL".equals(child.getValue())) {
-                TreeNode expr = child.getChildren().get(0);
-                emit("param", generateExpr(expr), null, null);
-            }
-        }
-
-        emit("call", fn, null, null);
+        String fnName = inst.getChildren().get(0).getAttribute(); // ID
+        TreeNode instructionPrimeNode = inst.getChildren().get(1);
+        TreeNode funcCallNode = instructionPrimeNode.getChildren().get(0); // FUNCTION_CALL
+        // FUNCTION_CALL -> PO ARG_LIST PT
+        TreeNode argListNode = funcCallNode.getChildren().get(1);
+        emitParams(argListNode);
+        emit("call", fnName, null, null); // No result captured directly for standalone calls
     }
 
     private void generateReturn(TreeNode evalNode) {
-        String place = generateExpr(evalNode);
+        String place = generateEvalExpr(evalNode);
         emit("return", place, null, null);
     }
 
@@ -407,52 +437,58 @@ public class CodeGenerator {
         return place;
     }
 
-    private String generateFactor(TreeNode f) {
-        // NUEVO: si no hay hijos, devolvemos cadena vacía
-        if (f.getChildren() == null || f.getChildren().isEmpty()) {
-            return "";
+    private String generateFactor(TreeNode factorNode) {
+        if (factorNode == null || factorNode.getChildren().isEmpty()) {
+            System.err.println("Error: Empty FACTOR node in generateFactor.");
+            return newTemp(); // Return a dummy temp
         }
 
-        // 1) Detección de llamada a función anidada
-        if ("FACTOR".equals(f.getValue())
-                && f.getChildren().size() > 1
-                && "FACTOR_PRIME".equals(f.getChildren().get(1).getValue())) {
-            TreeNode fp = f.getChildren().get(1);
-            if (!fp.getChildren().isEmpty()
-                    && "FUNCTION_CALL".equals(fp.getChildren().get(0).getValue())) {
-                // …emitParams + call…
-                TreeNode fc      = fp.getChildren().get(0);
-                String   fn      = f.getChildren().get(0).getAttribute();
-                TreeNode argList = fc.getChildren().get(1);
-                emitParams(argList);
-                String temp = newTemp();
-                emit("call", fn, null, temp);
-                return temp;
-            }
-        }
+        TreeNode firstChild = factorNode.getChildren().get(0);
+        String kind = firstChild.getValue();
 
-        // 2) Ahora ya sabemos que f tiene al menos un hijo
-        TreeNode first = f.getChildren().get(0);
-        String kind    = first.getValue();
+        switch (kind) {
+            case "PO": // FACTOR -> PO EVAL PT
+                TreeNode evalNode = factorNode.getChildren().get(1); // EVAL is the second child
+                return generateEvalExpr(evalNode);
 
-        if ("LITERAL".equals(kind)) {
-            String lit = first.getChildren().get(0).getAttribute();
-            return lit.length()==1 ? "'" + lit + "'" : lit;
-        }
-        else if ("ID".equals(kind)) {
-            return first.getAttribute();
-        }
-        else if ("PO".equals(kind)) {
-            // ( EVAL )
-            for (TreeNode ch : f.getChildren()) {
-                if ("EVAL".equals(ch.getValue())) {
-                    return generateExpr(ch.getChildren().get(0));
+            case "ID": // FACTOR -> ID FACTOR_PRIME
+                String idName = firstChild.getAttribute();
+                TreeNode factorPrimeNode = factorNode.getChildren().size() > 1 ? factorNode.getChildren().get(1) : null;
+
+                if (factorPrimeNode != null && !factorPrimeNode.getChildren().isEmpty() &&
+                    "FUNCTION_CALL".equals(factorPrimeNode.getChildren().get(0).getValue())) {
+                    // FACTOR_PRIME -> FUNCTION_CALL
+                    TreeNode funcCallNode = factorPrimeNode.getChildren().get(0);
+                    // FUNCTION_CALL -> PO ARG_LIST PT
+                    TreeNode argListNode = funcCallNode.getChildren().get(1);
+                    emitParams(argListNode);
+                    String temp = newTemp();
+                    emit("call", idName, null, temp); // idName is the function name
+                    return temp;
+                } else {
+                    // FACTOR_PRIME -> EPSILON, so it's just an ID
+                    return idName;
                 }
-            }
-        }
 
-        // 3) Caso genérico: deshacemos un nivel
-        return generateFactor(first);
+            case "LITERAL": // FACTOR -> LITERAL
+                TreeNode literalNode = firstChild.getChildren().get(0); // e.g., INTEGER_LITERAL
+                String literalValue = literalNode.getAttribute();
+                if ("CHAR_LITERAL".equals(literalNode.getValue())) {
+                    return "'" + literalValue + "'";
+                }
+                return literalValue; // For INTEGER_LITERAL, FLOAT_LITERAL
+
+            case "NOT": // FACTOR -> NOT FACTOR
+                TreeNode operandFactorNode = factorNode.getChildren().get(1); // The FACTOR after NOT
+                String operandPlace = generateFactor(operandFactorNode);
+                String tempNot = newTemp();
+                emit("NOT", operandPlace, null, tempNot); // Assumes TAC op "NOT"
+                return tempNot;
+
+            default:
+                System.err.println("Unhandled factor kind: " + kind + " in CodeGenerator.generateFactor");
+                return newTemp(); // Return a dummy temp
+        }
     }
 
 

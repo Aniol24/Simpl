@@ -1,7 +1,6 @@
 fn main:
 
-    int -> a = 4
-    a = 4 + 3
-    b = a
+    chr -> a
+    a = 'A'
 
     return

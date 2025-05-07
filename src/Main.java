@@ -14,7 +14,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        Path codePath = Paths.get("src/Files/Examples/code.smpl");
+        Path codePath = Paths.get("src/Files/Examples/fibonacci.smpl");
         String codeContent;
         try {
             codeContent = Files.readString(codePath);
