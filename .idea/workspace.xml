@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="millores en generacio TAC">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BackEnd/CodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/CodeGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BackEnd/TACInstruction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/TACInstruction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/Examples/test.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/test.smpl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

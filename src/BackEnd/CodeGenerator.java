@@ -42,7 +42,6 @@ public class CodeGenerator {
         String v = node.getValue();
         switch (v) {
             case "PARAMS":
-
                 out.add(node.getChildren().get(0));
                 collectParamNodes(node.getChildren().get(1), out);
                 break;
