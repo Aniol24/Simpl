@@ -1,20 +1,26 @@
 package FrontEnd.Lexicon;
 
+import Global.Errors.ErrorHandler;
+
 public class Scanner {
+
+    private final ErrorHandler errorHandler;
 
     private final String[] lines;
     private int currentLine;
     private int currentPosition;
     private int currentIndent;
 
-    public Scanner(String code) {
+    public Scanner(String code, ErrorHandler errorHandler) {
+        this.errorHandler = errorHandler;
+
         this.lines = code.split("\n");
         this.currentLine = 1;
         this.currentPosition = 0;
         this.currentIndent = 0;
     }
 
-    public Token nextToken() throws Exception {
+    public Token nextToken() {
         // Si ya se han procesado todas las líneas, pero quedan bloques abiertos,
         // devolvemos los tokens "END" pendientes.
         if (currentLine > lines.length && currentIndent > 0) {
@@ -39,7 +45,7 @@ public class Scanner {
                     currentIndent--;
                     return new Token("END", currentLine);
                 } else if (indent > currentIndent) {
-                    throw new Exception("Indentation error at line " + currentLine + ". Unexpected indent increase.");
+                    errorHandler.recordError("Indentation error at line " + currentLine + ". Unexpected indent increase.", currentLine);
                 }
             }
 
@@ -55,7 +61,7 @@ public class Scanner {
 
                 // Procesamiento de identificadores
                 if (Character.isLetter(ch) || ch == '_') {
-                    while (currentPosition < line.length() && Character.isLetterOrDigit(line.charAt(currentPosition))) {
+                    while (currentPosition < line.length() && (Character.isLetterOrDigit(line.charAt(currentPosition)) || (line.charAt(currentPosition) == '_'))) {
                         lexeme.append(line.charAt(currentPosition));
                         currentPosition++;
                     }
@@ -134,7 +140,7 @@ public class Scanner {
                     if (ch == ':') {
                         String remaining = getCurrentLine().substring(currentPosition).trim();
                         if (!remaining.isEmpty()) {
-                            throw new Exception("Error at line " + currentLine + ": unexpected code after ':'");
+                            errorHandler.recordError("Error at line " + currentLine + ": unexpected code after ':'", currentLine);
                         }
                         currentIndent++;
                         currentLine++;
@@ -147,10 +153,10 @@ public class Scanner {
                                 currentPosition++;
                                 return new Token("CHAR_LITERAL", String.valueOf(line.charAt(currentPosition - 2)), currentLine);
                             } else {
-                                throw new Exception("Error at line " + currentLine + ": missing closing single quote for character literal.");
+                                errorHandler.recordError("Error at line " + currentLine + ": missing closing single quote for character literal.", currentLine);
                             }
                         } else {
-                            throw new Exception("Error at line " + currentLine + ": invalid or empty character literal.");
+                            errorHandler.recordError("Error at line " + currentLine + ": invalid or empty character literal.", currentLine);
                         }
                     } else if (ch == '=') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {

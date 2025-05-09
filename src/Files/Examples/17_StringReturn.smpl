@@ -1,6 +1,0 @@
-fn get_message -> str:
-    return "Hello"
-
-fn main:
-    str -> msg = get_message()
-    return

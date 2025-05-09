@@ -1,6 +1,9 @@
 fn main:
-
-    chr -> a
-    a = 'A'
+    int -> x = 1
+    int -> y = 2
+    int -> z = 3
+    int -> a = 'A'
+    int -> b = 2
+    int -> c = 6
 
     return

@@ -1,4 +1,4 @@
-package BackEnd;
+package FrontEnd.TAC;
 
 public class TACInstruction {
     private final String op, arg1, arg2, result;

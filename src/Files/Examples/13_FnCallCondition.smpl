@@ -1,4 +1,4 @@
-fn is_positive(int -> n) -> bl:
+fn is_positive(int -> n) -> int:
     return n > 0
 
 fn main:

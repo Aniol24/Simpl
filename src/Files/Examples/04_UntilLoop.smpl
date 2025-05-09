@@ -2,5 +2,5 @@ fn main:
     int -> x = 5
     do:
         x = x - 1
-   until (x == 0)
-   return
+    until (x == 0)
+    return

@@ -1,0 +1,6 @@
+fn get_int -> int:
+    return 1
+
+fn main:
+    int -> msg = get_int()
+    return

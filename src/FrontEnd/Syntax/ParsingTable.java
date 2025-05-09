@@ -1,10 +1,5 @@
 package FrontEnd.Syntax;
 
-import Global.Errors.ErrorHandler;
-import Global.Errors.SimplException;
-import Global.Errors.SimplException.Type;
-
-
 import com.google.gson.*;
 
 import java.io.FileNotFoundException;
@@ -24,14 +19,14 @@ public class ParsingTable {
         parsingTable = new HashMap<>();
         try {
             createTable();
-        } catch (SimplException e) {
-            ErrorHandler.reportError("No such file or directory for grammar: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
             System.exit(1);
         }
         printTable(parsingTable);
     }
 
-    public void createTable() throws SimplException {
+    public void createTable() throws Exception {
         try {
             Gson gson = new Gson();
             Rule[] grammar = gson.fromJson(new FileReader("src/Files/JSON/gramatica.json"), Rule[].class);
@@ -59,7 +54,7 @@ public class ParsingTable {
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new SimplException(Type.GRAMMAR, -1, "Fichero de grámatica o FIRST/FOLLOW no encontrado: " + e.getMessage());
+            throw new Exception("Fichero de grámatica o FIRST/FOLLOW no encontrado: " + e.getMessage());
         }
     }
 

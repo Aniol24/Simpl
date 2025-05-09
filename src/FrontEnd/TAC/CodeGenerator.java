@@ -1,4 +1,4 @@
-package BackEnd;
+package FrontEnd.TAC;
 
 import FrontEnd.Syntax.TreeNode;
 import java.util.ArrayList;

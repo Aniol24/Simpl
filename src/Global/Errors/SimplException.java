@@ -1,5 +1,6 @@
 package Global.Errors;
 
+// SENSE USAR
 public class SimplException extends Exception{
     public enum Type { FILE_READ, SYNTAX, GRAMMAR, SEMANTIC, INTERNAL }
 

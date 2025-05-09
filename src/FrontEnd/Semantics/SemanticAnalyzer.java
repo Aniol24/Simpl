@@ -1,32 +1,31 @@
 package FrontEnd.Semantics;
 
 import FrontEnd.Syntax.TreeNode;
+import Global.Errors.ErrorHandler;
 import Global.SymbolTable.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SemanticAnalyzer {
+
+    private final ErrorHandler errorHandler;
+    private final TreeNode root;
+
     private SymbolTable symbolTable;
-    private List<String> semanticErrors;
     private Symbol currentFunction;
 
-    public SemanticAnalyzer(TreeNode root) {
+    public SemanticAnalyzer(TreeNode root, ErrorHandler errorHandler) {
+        this.root = root;
+        this.errorHandler = errorHandler;
         this.symbolTable = new SymbolTable();
-        this.semanticErrors = new ArrayList<>();
         this.currentFunction = null;
+    }
+
+    public void analyze() {
         System.out.println("Starting semantic analysis...");
         analyzeNode(root);
         System.out.println("Semantic analysis completed.");
-        if (!semanticErrors.isEmpty()) {
-            System.err.println("\n--- Semantic Errors Found ---");
-            for (String error : semanticErrors) {
-                System.err.println(error);
-            }
-            System.err.println("---------------------------");
-        } else {
-            System.out.println("No semantic errors detected.");
-        }
     }
 
     private void analyzeNode(TreeNode node) {
@@ -368,7 +367,7 @@ public class SemanticAnalyzer {
                 if (initExprType != null) {
                     isInitialized = true;
                     if (!isTypeCompatible(varType, initExprType)) {
-                        reportError(getLine(eqNode), "Type mismatch: Cannot assign expression of type '" + initExprType + "' to variable '" + varName + "' of type '" + varType + "'.");
+                        reportError(getLine(eqNode), "Type mismatch: Cannot assign expression of type '" + initExprType + "' to variable '" + varName + "' of type '" + varType + "'");
                     }
                 }
             } else {
@@ -665,6 +664,7 @@ public class SemanticAnalyzer {
         }
         return currentType;
     }
+
     private String analyzeTerm(TreeNode termNode) {
         TreeNode factorNode = findNode(termNode, "FACTOR");
         if (factorNode == null) {
@@ -978,6 +978,6 @@ public class SemanticAnalyzer {
     }
 
     private void reportError(int line, String message) {
-        semanticErrors.add("Semantic Error at line " + line + ": " + message);
+        errorHandler.recordError(message, line);
     }
 }

@@ -3,22 +3,27 @@ package FrontEnd.Syntax;
 import java.util.*;
 import FrontEnd.Lexicon.Scanner;
 import FrontEnd.Lexicon.Token;
+import Global.Errors.ErrorHandler;
 
 public class Parser {
 
-    private Scanner scanner;
+    private final ErrorHandler errorHandler;
+
+    private final Scanner scanner;
     private final Map<String, Map<String, List<String>>> parsingTable;
     private final Stack<Token> stack = new Stack<>();
     private final Stack<TreeNode> nodeStack = new Stack<>();
     private TreeNode parseTreeRoot;
 
-    public Parser(Scanner scanner) {
+    public Parser(Scanner scanner, ErrorHandler errorHandler) {
+        this.errorHandler = errorHandler;
+
         ParsingTable pt = new ParsingTable();
         this.scanner = scanner;
         this.parsingTable = pt.getParsingTable();
     }
 
-    public void parse() throws Exception {
+    public void parse() {
         stack.push(new Token("INICIAL", 0));
         parseTreeRoot = new TreeNode(new Token("ROOT", 0));
         parseTreeRoot.setRoot(true);
@@ -30,6 +35,7 @@ public class Parser {
         System.out.println("Token value: " + token.getValue());
         System.out.println("Token attribute: " + token.getAttribute());
         System.out.println("Token line: " + token.getLine());
+        System.out.println("\n\n");
 
         while (!stack.isEmpty()) {
             printStack(stack);
@@ -47,17 +53,18 @@ public class Parser {
                 System.out.println("Token value: " + token.getValue());
                 System.out.println("Token attribute: " + token.getAttribute());
                 System.out.println("Token line: " + token.getLine());
+                System.out.println("\n\n");
                 continue;
             }
 
             if (isTerminal(top.getValue())) {
-                error("Esperaba '" + top.getValue() + "', pero se encontró '" + token.getValue() + "'");
+                errorHandler.recordError("Expected '" + top.getValue() + "', but found '" + token.getValue() + "'", token.getLine());
                 return;
             }
 
             List<String> production = getProduction(top.getValue(), token.getValue());
             if (production == null) {
-                error("No existe producción para [" + top.getValue() + ", " + token.getValue() + "] para " + token.getAttribute() + " en la línea " + token.getLine());
+                errorHandler.recordError("There is no production for " + token.getAttribute(), token.getLine());
                 return;
             }
 
@@ -98,10 +105,6 @@ public class Parser {
 
     private boolean isTerminal(String symbol) {
         return !parsingTable.containsKey(symbol);
-    }
-
-    private void error(String msg) {
-        System.err.println("ERROR: " + msg);
     }
 
     private void printTree(TreeNode node, String prefix, boolean isLast) {
