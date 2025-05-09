@@ -25,7 +25,7 @@ public class Scope {
     public Symbol lookupSymbol(String name) {
 
         Symbol symbol = symbols.get(name);
-        System.out.println("Hello");
+
         if (symbol != null) {
             return symbol;
         }

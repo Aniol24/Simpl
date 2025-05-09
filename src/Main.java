@@ -5,6 +5,7 @@ import FrontEnd.Preprocessor.Preprocessor;
 import FrontEnd.Semantics.SemanticAnalyzer;
 import FrontEnd.Syntax.Parser;
 import Global.Errors.ErrorHandler;
+import Global.SymbolTable.SymbolTable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,9 +31,10 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        Path codePath = Paths.get("src/Files/Examples/test.smpl");
+        Path codePath = Paths.get("src/Files/Examples/13_FnCallCondition.smpl");
 
         ErrorHandler errorHandler = new ErrorHandler();
+        SymbolTable symbolTable = new SymbolTable();
 
         String codeContent;
         try {
@@ -47,8 +49,10 @@ public class Main {
         Parser parser    = new Parser(scanner, errorHandler);
         parser.parse();
 
-        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser.getParseTreeRoot(), errorHandler);
+        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(parser.getParseTreeRoot(), symbolTable, errorHandler);
         semanticAnalyzer.analyze();
+
+        semanticAnalyzer.printSymbolTableContents();
 
         if (errorHandler.hasErrors()) {
             errorHandler.printErrors();

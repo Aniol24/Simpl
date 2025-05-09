@@ -62,6 +62,7 @@ public class Parser {
                 return;
             }
 
+            // TODO: Si es tabula malament i surt un int, mostra error incorrecte. FN END INT. S'hauria de millorar la gestió d'errrors
             List<String> production = getProduction(top.getValue(), token.getValue());
             if (production == null) {
                 errorHandler.recordError("There is no production for " + token.getAttribute(), token.getLine());

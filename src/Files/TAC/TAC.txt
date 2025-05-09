@@ -1,7 +1,16 @@
+Result: is_positive Arg1:  Arg2:  Op: label
+Result: n Arg1: param1 Arg2:  Op: =
+Result: t0 Arg1: n Arg2: 0 Op: GREATER
+Result:  Arg1: t0 Arg2:  Op: return
+Result: end_is_positive Arg1:  Arg2:  Op: label
 Result: main Arg1:  Arg2:  Op: label
+Result: x Arg1: 5 Arg2:  Op: =
+Result:  Arg1: x Arg2:  Op: param
+Result: t1 Arg1: is_positive Arg2:  Op: call
+Result: L0 Arg1: t1 Arg2:  Op: ifFalse
 Result: x Arg1: 1 Arg2:  Op: =
-Result: y Arg1: 2 Arg2:  Op: =
-Result: z Arg1: 3 Arg2:  Op: =
-Result: a Arg1: 'A' Arg2:  Op: =
-Result: b Arg1: t0 Arg2:  Op: =
+Result: L1 Arg1:  Arg2:  Op: goto
+Result: L0 Arg1:  Arg2:  Op: label
+Result: L1 Arg1:  Arg2:  Op: label
+Result:  Arg1:  Arg2:  Op: return
 Result: end_main Arg1:  Arg2:  Op: label

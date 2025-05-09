@@ -11,14 +11,13 @@ public class SemanticAnalyzer {
 
     private final ErrorHandler errorHandler;
     private final TreeNode root;
-
-    private SymbolTable symbolTable;
+    private final SymbolTable symbolTable;
     private Symbol currentFunction;
 
-    public SemanticAnalyzer(TreeNode root, ErrorHandler errorHandler) {
+    public SemanticAnalyzer(TreeNode root, SymbolTable symbolTable, ErrorHandler errorHandler) {
         this.root = root;
         this.errorHandler = errorHandler;
-        this.symbolTable = new SymbolTable();
+        this.symbolTable = symbolTable;
         this.currentFunction = null;
     }
 
@@ -184,7 +183,6 @@ public class SemanticAnalyzer {
         }
     }
 
-
     private void declareFunctionSignature(TreeNode funcNode) {
         TreeNode fnTokenNode = findNode(funcNode, "FN");
         TreeNode funcPrimeNode;
@@ -349,43 +347,44 @@ public class SemanticAnalyzer {
         TreeNode initOptNode = findNode(declNode, "INIT_OPT");
 
         if (typeNode == null || arrowNode == null || idNode == null) {
-            reportError(getLine(declNode), "Malformed variable declaration.");
+            reportError(getLine(declNode), "Malformed variable declaration. Expected VAR_TYPE ARROW ID [INIT_OPT].");
             return;
         }
 
         String varType = extractType(typeNode);
         String varName = idNode.getAttribute();
-        int line = idNode.getToken().getLine();
+        int line = getLine(idNode);
         boolean isInitialized = false;
-        String initExprType;
 
-        if (initOptNode != null && initOptNode.getChildren().size() > 1) { // Miramos si no es epsilon
-            TreeNode eqNode = findNode(initOptNode, "EQ");
-            TreeNode evalNode = findNode(initOptNode, "EVAL");
-            if (eqNode != null && evalNode != null) {
-                initExprType = analyzeEval(evalNode);
-                if (initExprType != null) {
-                    isInitialized = true;
+        if (initOptNode != null && !initOptNode.getChildren().isEmpty() && !"EPSILON".equals(initOptNode.getChildren().get(0).getValue())) {
+            if (initOptNode.getChildren().size() == 2 &&
+                "EQ".equals(initOptNode.getChildren().get(0).getValue()) &&
+                "EVAL".equals(initOptNode.getChildren().get(1).getValue())) {
+                
+                TreeNode evalNode = initOptNode.getChildren().get(1);
+                String initExprType = analyzeEval(evalNode);
+                if (initExprType != null) { // Error in analyzeEval would have been reported
                     if (!isTypeCompatible(varType, initExprType)) {
-                        reportError(getLine(eqNode), "Type mismatch: Cannot assign expression of type '" + initExprType + "' to variable '" + varName + "' of type '" + varType + "'");
+                        reportError(getLine(evalNode), "Type mismatch in declaration of '" + varName + "'. Cannot initialize variable of type '" + varType + "' with value of type '" + initExprType + "'.");
+                    } else {
+                        isInitialized = true;
                     }
                 }
             } else {
-                reportError(getLine(initOptNode), "Malformed initializer in declaration.");
+                reportError(getLine(initOptNode), "Malformed initializer for variable '" + varName + "'. Expected 'EQ EVAL'.");
             }
         }
 
-        Symbol existing = symbolTable.lookupSymbol(varName);
-        if (existing != null) {
-            reportError(line, "Variable '" + varName + "' already declared in an outer scope at line " + existing.getLineNumber());
-            return;
+        Symbol existingInCurrent = symbolTable.getCurrentScope().lookupSymbol(varName);
+        if (existingInCurrent != null) {
+            reportError(line, "Variable '" + varName + "' already declared in this scope at line " + existingInCurrent.getLineNumber() + ".");
+            return; 
         }
 
         Symbol varSymbol = new Symbol(varName, varType, line);
         varSymbol.setInitialized(isInitialized);
-        if (!symbolTable.declareSymbol(varSymbol)) {
-            Symbol existingCurr = symbolTable.getCurrentScope().lookupSymbol(varName);
-            reportError(line, "Variable '" + varName + "' already declared in this scope at line " + (existingCurr != null ? existingCurr.getLineNumber() : "?"));
+        if(!symbolTable.declareSymbol(varSymbol)){
+             reportError(line, "Failed to declare variable '" + varName + "'. It might already exist in the current scope.");
         }
     }
 
@@ -424,7 +423,7 @@ public class SemanticAnalyzer {
         }
 
         String name = idNode.getAttribute();
-        int line = idNode.getToken().getLine();
+        int line = getLine(idNode);
 
         Symbol symbol = symbolTable.lookupSymbol(name);
         if (symbol == null) {
@@ -436,7 +435,6 @@ public class SemanticAnalyzer {
         TreeNode funcCallNode = findNode(instructionPrimeNode, "FUNCTION_CALL");
 
         if (assignmentNode != null) {
-            // Assignment (ID = <eval> or ID++ etc.)
             if (symbol.isFunction()) {
                 reportError(line, "Cannot assign to function '" + name + "'.");
                 return;
@@ -444,27 +442,30 @@ public class SemanticAnalyzer {
 
             TreeNode incNode = findNode(assignmentNode, "INC");
             TreeNode decNode = findNode(assignmentNode, "DEC");
-            TreeNode eqNode   = findNode(assignmentNode, "EQ");
-            TreeNode exprNode = findNode(assignmentNode, "EXPR");
-
-            if (eqNode != null && exprNode != null) {
+            TreeNode eqNode = findNode(assignmentNode, "EQ");
+            
+            if (eqNode != null) { 
+                TreeNode exprNode = findNode(assignmentNode, "EXPR");
+                if (exprNode == null) {
+                    reportError(getLine(assignmentNode), "Malformed assignment for '" + name + "': missing expression after '='.");
+                    return;
+                }
                 String rhsType = analyzeExpr(exprNode);
-                if (rhsType != null) {
+                if (rhsType != null) { // Error in expr analysis already reported
                     if (!isTypeCompatible(symbol.getType(), rhsType)) {
-                        reportError(getLine(eqNode), "Type mismatch: Cannot assign expression of type '" + rhsType + "' to variable '" + name + "' of type '" + symbol.getType() + "'.");
+                        reportError(getLine(exprNode), "Type mismatch: cannot assign '" + rhsType + "' to variable '" + name + "' of type '" + symbol.getType() + "'.");
+                    } else {
+                        symbol.setInitialized(true);
                     }
-                    symbol.setInitialized(true);
                 }
             } else if (incNode != null || decNode != null) {
-                if(!symbol.isInitialized()) {
-                    reportError(line, "Variable '" + name + "' might not have been initialized before increment/decrement.");
+                if (!isNumeric(symbol.getType())) {
+                    reportError(line, "Increment/decrement operation requires a numeric variable, but '" + name + "' is type '" + symbol.getType() + "'.");
+                } else {
+                    symbol.setInitialized(true); 
                 }
-                if (!symbol.getType().equals("int") && !symbol.getType().equals("flt")) {
-                    reportError(line, "Operator '++/--' cannot be applied to type '" + symbol.getType() + "'.");
-                }
-                symbol.setInitialized(true);
             } else {
-                reportError(getLine(assignmentNode), "Unrecognized assignment operation for '" + name + "'.");
+                reportError(getLine(assignmentNode), "Malformed assignment structure for '" + name + "'.");
             }
 
         } else if (funcCallNode != null) {
@@ -479,14 +480,25 @@ public class SemanticAnalyzer {
         }
     }
     private void analyzeConditionalOrLoop(TreeNode node) {
-        TreeNode evalNode = findNodeRecursive(node, "EVAL");
-        if (evalNode != null) {
-            analyzeEval(evalNode);
+        TreeNode conditionEvalNode = null;
+        if (node.getChildren().size() > 2 && "PO".equals(node.getChildren().get(1).getValue())) {
+            TreeNode potentialEvalNode = node.getChildren().get(2);
+            if ("EVAL".equals(potentialEvalNode.getValue())) {
+                conditionEvalNode = potentialEvalNode;
+            }
+        }
+
+        if (conditionEvalNode != null) {
+            String conditionType = analyzeEval(conditionEvalNode);
+            if (conditionType != null && !isNumeric(conditionType)) { // Conditions must be numeric
+                reportError(getLine(conditionEvalNode), "Condition for '" + node.getValue() + "' statement must result in a numeric type (int/flt), but found '" + conditionType + "'.");
+            }
         } else {
-            reportError(getLine(node), "Missing condition expression in " + node.getValue() + " statement.");
+            reportError(getLine(node), "Missing condition expression (EVAL) in " + node.getValue() + " statement.");
         }
 
         TreeNode codeBlock = findCodeBlock(node);
+
         if(codeBlock != null) {
             analyzeCodeBlock(codeBlock);
         } else if (hasStartEnd(node)){
@@ -495,55 +507,63 @@ public class SemanticAnalyzer {
     }
 
     private void analyzeForLoop(TreeNode forNode) {
-        // FOR (<declaration> , <eval> , ID <assignment>) START <code> END
-
         symbolTable.enterScope("for_loop_scope@" + getLine(forNode));
 
-        // Declaration
-        TreeNode declNode = findNode(forNode, "DECLARATION");
+        TreeNode declNode = findNodeAtIndex(forNode, "DECLARATION", 2); // FOR PO DECLARATION ...
         if (declNode != null) {
             analyzeDeclaration(declNode);
         } else {
             reportError(getLine(forNode), "Missing declaration part in for loop.");
         }
 
-        // Condition
-        TreeNode evalNode = findNode(forNode, "EVAL");
+        TreeNode evalNode = findNodeAtIndex(forNode, "EVAL", 4); // ... SEMICOLON EVAL ...
         if (evalNode != null) {
-            analyzeEval(evalNode);
+            String conditionType = analyzeEval(evalNode);
+            if (conditionType != null && !isNumeric(conditionType)) { // Condition must be numeric
+                reportError(getLine(evalNode), "Condition in for loop must result in a numeric type (int/flt), but found '" + conditionType + "'.");
+            }
         } else {
             reportError(getLine(forNode), "Missing condition part in for loop.");
         }
 
-        // Update (ID <assignment>)
-        TreeNode idNode = findNode(forNode, "ID");
-        TreeNode assignmentNode = findNode(forNode, "ASSIGNMENT");
+        TreeNode idNode = findNodeAtIndex(forNode, "ID", 6); // ... SEMICOLON ID ...
+        TreeNode assignmentNode = findNodeAtIndex(forNode, "ASSIGNMENT", 7); // ... ID ASSIGNMENT ...
         if (idNode != null && assignmentNode != null) {
             String idName = idNode.getAttribute();
-            Symbol loopVar = symbolTable.lookupSymbol(idName);
+            Symbol loopVar = symbolTable.lookupSymbol(idName); 
             if (loopVar == null) {
                 reportError(getLine(idNode), "Identifier '" + idName + "' in for loop update part not declared.");
             } else if (loopVar.isFunction()) {
-                reportError(getLine(idNode), "Cannot use function '" + idName + "' in for loop update part.");
+                reportError(getLine(idNode), "Cannot use function '" + idName + "' as a loop update variable.");
             } else {
-                if(!loopVar.isInitialized()) {
-                    reportError(getLine(idNode), "Variable '" + idName + "' might not be initialized before for loop update.");
-                }
-                // ++/--
-                TreeNode incNode = findNode(assignmentNode, "INCREMENT");
-                TreeNode decNode = findNode(assignmentNode, "DECREMENT");
-                if(incNode != null || decNode != null) {
-                    if (!loopVar.getType().equals("int") && !loopVar.getType().equals("flt")) {
-                        reportError(getLine(idNode), "Operator '++/--' in for loop update cannot be applied to type '" + loopVar.getType() + "'.");
+                // Simplified analysis for assignment part (INC, DEC, or EQ EXPR)
+                TreeNode incNode = findNode(assignmentNode, "INC");
+                TreeNode decNode = findNode(assignmentNode, "DEC");
+                TreeNode eqNode = findNode(assignmentNode, "EQ");
+                if (incNode != null || decNode != null) {
+                    if (!isNumeric(loopVar.getType())) {
+                        reportError(getLine(idNode), "Increment/decrement in for loop update requires a numeric variable, but '" + idName + "' is '" + loopVar.getType() + "'.");
                     }
+                } else if (eqNode != null) {
+                    TreeNode exprNode = findNode(assignmentNode, "EXPR");
+                    if (exprNode != null) {
+                        String rhsType = analyzeExpr(exprNode);
+                        if (rhsType != null && !isTypeCompatible(loopVar.getType(), rhsType)) {
+                            reportError(getLine(exprNode), "Type mismatch in for loop update: cannot assign '" + rhsType + "' to '" + loopVar.getType() + "' variable '" + idName + "'.");
+                        }
+                    } else {
+                        reportError(getLine(assignmentNode), "Missing expression in for loop update assignment for '" + idName + "'.");
+                    }
+                } else {
+                    reportError(getLine(assignmentNode), "Invalid assignment structure in for loop update part for '" + idName + "'.");
                 }
             }
         } else {
-            reportError(getLine(forNode), "Missing update part (ID assignment) in for loop.");
+            reportError(getLine(forNode), "Missing update part (ID and/or assignment) in for loop.");
         }
 
-
         TreeNode codeBlock = findCodeBlock(forNode);
+
         if(codeBlock != null) {
             analyzeCodeBlock(codeBlock);
         } else {
@@ -584,25 +604,27 @@ public class SemanticAnalyzer {
     }
 
     private String analyzeEval(TreeNode evalNode) {
-        // <eval> ::= <expr> <eval'>
         TreeNode exprNode = findNode(evalNode, "EXPR");
         if (exprNode == null) {
             reportError(getLine(evalNode), "Invalid expression structure (missing EXPR in EVAL).");
             return null;
         }
-
         String currentType = analyzeExpr(exprNode);
         if (currentType == null) return null;
 
-        // Iteramos <eval'>
         TreeNode evalPrimeNode = findNode(evalNode, "EVAL_PRIME");
-        while (evalPrimeNode != null && evalPrimeNode.getChildren().size() > 1) {
-            TreeNode operatorNode = evalPrimeNode.getChildren().getFirst();
-            TreeNode nextExprNode = findNode(evalPrimeNode, "EXPR");
-
-            if (nextExprNode == null) {
-                reportError(getLine(evalPrimeNode), "Invalid expression structure (missing EXPR after operator '" + operatorNode.getValue() + "').");
+        while (evalPrimeNode != null && !evalPrimeNode.getChildren().isEmpty() && !"EPSILON".equals(evalPrimeNode.getChildren().get(0).getValue())) {
+            // EVAL_PRIME -> OP EXPR EVAL_PRIME'
+            if (evalPrimeNode.getChildren().size() < 2) { // Should be at least OP and EXPR
+                reportError(getLine(evalPrimeNode), "Invalid EVAL_PRIME structure.");
                 return null;
+            }
+            TreeNode operatorNode = evalPrimeNode.getChildren().get(0);
+            TreeNode nextExprNode = evalPrimeNode.getChildren().get(1);
+
+            if (!"EXPR".equals(nextExprNode.getValue())) {
+                 reportError(getLine(nextExprNode), "Invalid expression structure (expected EXPR after operator '" + operatorNode.getValue() + "').");
+                 return null;
             }
 
             String nextType = analyzeExpr(nextExprNode);
@@ -611,24 +633,32 @@ public class SemanticAnalyzer {
             String operator = operatorNode.getValue();
             if (isComparisonOperator(operator)) {
                 if (!areTypesComparable(currentType, nextType)) {
-                    reportError(getLine(operatorNode), "Cannot compare types '" + currentType + "' and '" + nextType + "' using operator '" + operator + "'.");
+                    reportError(getLine(operatorNode), "Cannot compare type '" + currentType + "' with '" + nextType + "' using operator '" + operator + "'.");
                     return null;
                 }
-                currentType = "bool";
-            } else if (isBooleanOperator(operator)) {
-                if (!isBooleanConvertible(currentType) || !isBooleanConvertible(nextType)) {
-                    reportError(getLine(operatorNode), "Operator '" + operator + "' requires boolean-compatible operands, found '" + currentType + "' and '" + nextType + "'.");
+                currentType = "int"; // 0 o 1
+            } else if (isBooleanOperator(operator)) { // AND, OR
+                if (!isNumeric(currentType)) {
+                    reportError(getLine(operatorNode), "Left operand for logical operator '" + operator + "' must be numeric (int/flt), but found '" + currentType + "'.");
                     return null;
                 }
-                currentType = "bool";
+                if (!isNumeric(nextType)) {
+                    reportError(getLine(operatorNode), "Right operand for logical operator '" + operator + "' must be numeric (int/flt), but found '" + nextType + "'.");
+                    return null;
+                }
+                currentType = "int"; // Resultado de la operación lógica es int (0 or 1)
             } else {
-                reportError(getLine(operatorNode), "Internal error: Unhandled operator '" + operator + "' in <eval'> chain.");
+                reportError(getLine(operatorNode), "Unknown or unsupported operator '" + operator + "' in EVAL context.");
                 return null;
             }
 
-            evalPrimeNode = findNode(evalPrimeNode, "EVAL_PRIME");
+            if (evalPrimeNode.getChildren().size() > 2) {
+                evalPrimeNode = evalPrimeNode.getChildren().get(2);
+                if ("EPSILON".equals(evalPrimeNode.getValue())) evalPrimeNode = null;
+            } else {
+                evalPrimeNode = null; 
+            }
         }
-
         return currentType;
     }
 
@@ -703,77 +733,71 @@ public class SemanticAnalyzer {
     }
 
     private String analyzeFactor(TreeNode factorNode) {
-        TreeNode firstChild = factorNode.getChildren().isEmpty() ? null : factorNode.getChildren().get(0);
-        if (firstChild == null) {
+        if (factorNode.getChildren().isEmpty()) {
             reportError(getLine(factorNode), "Empty factor node encountered.");
             return null;
         }
+        TreeNode firstChild = factorNode.getChildren().get(0);
+        String nodeValue = firstChild.getValue();
 
-        String nodeType = firstChild.getValue();
-
-        switch (nodeType) {
-            case "LPAREN" -> {
-                TreeNode evalNode = findNode(factorNode, "EVAL");
+        switch (nodeValue) {
+            case "LPAREN": // Factor -> LPAREN EVAL RPAREN
+                TreeNode evalNode = findNode(factorNode, "EVAL"); // EVAL is child of factorNode
                 if (evalNode == null) {
-                    reportError(getLine(factorNode), "Malformed parenthesized expression.");
+                    reportError(getLine(factorNode), "Malformed parenthesized expression: missing EVAL after '('.");
                     return null;
                 }
                 return analyzeEval(evalNode);
-            }
-            case "ID" -> {
+            case "ID": // Factor -> ID FACTOR_PRIME
                 String name = firstChild.getAttribute();
-                int line = firstChild.getToken().getLine();
+                int line = getLine(firstChild);
                 Symbol symbol = symbolTable.lookupSymbol(name);
-
                 if (symbol == null) {
                     reportError(line, "Identifier '" + name + "' not declared.");
                     return null;
                 }
+                // Opcional: comprobar si la variable se ha inicializado
+                if (!symbol.isInitialized() && !symbol.isFunction()) {
+                    reportError(line, "Variable '" + name + "' might not have been initialized.");
+                }
 
                 TreeNode fp = findNode(factorNode, "FACTOR_PRIME");
-                TreeNode funcCallNode = fp != null ? findNode(fp, "FUNCTION_CALL") : null;
+                TreeNode funcCallNode = (fp != null && !fp.getChildren().isEmpty() && !"EPSILON".equals(fp.getChildren().get(0).getValue()))
+                                        ? findNode(fp, "FUNCTION_CALL") : null;
                 if (funcCallNode != null) {
                     if (!symbol.isFunction()) {
-                        reportError(line, "'" + name + "' is not a function and cannot be called.");
+                        reportError(line, "'" + name + "' is not a function, cannot call it.");
                         return null;
                     }
-                    analyzeFunctionCall(firstChild, funcCallNode);
+                    analyzeFunctionCallArgs(funcCallNode, symbol);
                     return symbol.getReturnType();
                 } else {
                     if (symbol.isFunction()) {
-                        reportError(line, "Cannot use function '" + name + "' as a value without calling it.");
+                        reportError(line, "Function '" + name + "' used as a variable without a call.");
                         return null;
-                    }
-
-                    if (!symbol.isInitialized()) {
-                        reportError(line, "Variable '" + name + "' might not have been initialized before use.");
                     }
                     return symbol.getType();
                 }
-            }
-            case "LITERAL" -> {
+            case "LITERAL": // Factor -> LITERAL
                 return analyzeLiteral(firstChild);
-            }
-            case "NOT" -> {
+            case "NOT": // Factor -> NOT FACTOR
                 TreeNode nextFactor = findNode(factorNode, "FACTOR");
                 if (nextFactor == null) {
-                    reportError(getLine(firstChild), "Missing expression after NOT operator.");
+                    reportError(getLine(factorNode), "Malformed NOT operation: missing FACTOR after 'NOT'.");
                     return null;
                 }
                 String operandType = analyzeFactor(nextFactor);
                 if (operandType != null) {
-                    if (!isBooleanConvertible(operandType)) {
-                        reportError(getLine(firstChild), "Operator 'NOT' requires a boolean-compatible operand, found '" + operandType + "'.");
+                    if (!isNumeric(operandType)) { // NOT expects numeric operand
+                        reportError(getLine(firstChild), "Operator 'NOT' requires a numeric operand (int/flt), but found type '" + operandType + "'.");
                         return null;
                     }
-                    return "bool";
+                    return "int"; // 0 or 1
                 }
                 return null;
-            }
-            case null, default -> {
-                reportError(getLine(factorNode), "Unrecognized factor structure starting with '" + nodeType + "'.");
+            default:
+                reportError(getLine(firstChild), "Unrecognized factor structure starting with '" + nodeValue + "'.");
                 return null;
-            }
         }
     }
 
@@ -873,13 +897,6 @@ public class SemanticAnalyzer {
         return false;
     }
 
-    private boolean isBooleanConvertible(String type) {
-        if (type == null) return false;
-
-        if ("bool".equals(type)) return true;
-        return false;
-    }
-
     private String promoteNumericType(String type1, String type2) {
         if ("flt".equals(type1) || "flt".equals(type2)) return "flt";
         if ("int".equals(type1) && "int".equals(type2)) return "int";
@@ -896,6 +913,16 @@ public class SemanticAnalyzer {
     private TreeNode findNode(TreeNode parent, String value) {
         if (parent == null) return null;
         for (TreeNode child : parent.getChildren()) {
+            if (value.equals(child.getValue())) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    private TreeNode findNodeAtIndex(TreeNode parent, String value, int index) {
+        if (parent != null && parent.getChildren().size() > index) {
+            TreeNode child = parent.getChildren().get(index);
             if (value.equals(child.getValue())) {
                 return child;
             }
@@ -979,5 +1006,9 @@ public class SemanticAnalyzer {
 
     private void reportError(int line, String message) {
         errorHandler.recordError(message, line);
+    }
+
+    public void printSymbolTableContents() {
+        symbolTable.printAllScopesDetails();
     }
 }
