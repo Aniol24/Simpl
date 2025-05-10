@@ -6,11 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="millores en generacio TAC">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/Examples/test.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/test.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/code.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/code.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/JSON/gramatica.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/JSON/gramatica.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/FrontEnd/Semantics/SemanticAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Semantics/SemanticAnalyzer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Syntax/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Syntax/Parser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Global/SymbolTable/Scope.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/SymbolTable/Scope.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Global/SymbolTable/SymbolTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/SymbolTable/SymbolTable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/TAC/CodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/TAC/CodeGenerator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
     <list id="8c9ea878-fd46-43de-8820-7b850b3ceac5" name="Changes by javiernajera" comment="" />
@@ -29,7 +30,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="error_handler" />
+        <entry key="$PROJECT_DIR$" value="TAC" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -61,30 +62,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Main.executor": "Run",
-    "Application.analitzadorGramatica.executor": "Run",
-    "Downloaded.Files.Path.Enabled": "false",
-    "Repository.Attach.Annotations": "false",
-    "Repository.Attach.JavaDocs": "false",
-    "Repository.Attach.Sources": "false",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "millores",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "com.github.copilot.settings.ApplicationConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;Application.analitzadorGramatica.executor&quot;: &quot;Run&quot;,
+    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;millores&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.github.copilot.settings.ApplicationConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/Files/JSON" />
@@ -236,47 +237,6 @@
     <MESSAGE value="TAC funciona parcialment (falta testing)" />
     <MESSAGE value="millores en generacio TAC" />
     <option name="LAST_COMMIT_MESSAGE" value="millores en generacio TAC" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java</url>
-          <line>47</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java</url>
-          <line>275</line>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java</url>
-          <line>267</line>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java</url>
-          <line>271</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java</url>
-          <line>135</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java</url>
-          <line>263</line>
-          <option name="timeStamp" value="19" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/FrontEnd/Syntax/Parser.java</url>
-          <line>51</line>
-          <option name="timeStamp" value="21" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -127,6 +127,83 @@ public class CodeGenerator {
         }
     }
 
+    private void generateFor(TreeNode forLoopNode) {
+        // 1) Inicialización: int -> i = 0
+        TreeNode initDecl = forLoopNode.getChildren().get(2);
+        generateDeclaration(initDecl);
+
+        // 2) Etiqueta de inicio de condición
+        String startLbl = newLabel();
+        emit("label", null, null, startLbl);
+
+        // 3) Condición: i < 10
+        TreeNode condNode = forLoopNode.getChildren().get(4);
+        String condTemp  = generateEvalExpr(condNode);
+        String endLbl    = newLabel();
+        emit("ifFalse", condTemp, null, endLbl);
+
+        // 4) Cuerpo del for
+        TreeNode codeNode = forLoopNode.getChildren().get(10);
+        processCode(codeNode);
+
+        // 5) Incremento: i++ (o i--, o i = i + k)
+        TreeNode idNode         = forLoopNode.getChildren().get(6);
+        TreeNode assignmentNode = forLoopNode.getChildren().get(7);
+        String   varName        = idNode.getAttribute();
+        String   kind           = assignmentNode.getChildren().get(0).getValue();
+
+        switch (kind) {
+            case "INC": {
+                String tmp = newTemp();
+                emit("SUM", varName, "1", tmp);
+                emit("=", tmp, null, varName);
+                break;
+            }
+            case "DEC": {
+                String tmp = newTemp();
+                emit("SUB", varName, "1", tmp);
+                emit("=", tmp, null, varName);
+                break;
+            }
+            case "EQ": {
+                // Para un for del tipo i = i + k
+                TreeNode exprNode = assignmentNode.getChildren().get(1);
+                String rhs = generateExpr(exprNode);
+                emit("=", rhs, null, varName);
+                break;
+            }
+            default:
+                System.err.println("generateFor: tipo de incremento no soportado: " + kind);
+        }
+
+        // 6) Vuelve a la condición
+        emit("goto", null, null, startLbl);
+
+        // 7) Etiqueta de salida
+        emit("label", null, null, endLbl);
+    }
+
+    private void generateUntil(TreeNode untilNode) {
+        // 1) Etiqueta de comienzo del bucle
+        String startLbl = newLabel();
+        emit("label", null, null, startLbl);
+
+        // 2) Cuerpo: el bloque CODE está en child[2]
+        TreeNode codeNode = untilNode.getChildren().get(2);
+        processCode(codeNode);
+
+        // 3) Condición: el nodo EVAL está en child[6]
+        TreeNode evalNode = untilNode.getChildren().get(6);
+        String condTemp = generateEvalExpr(evalNode);
+
+        // 4) Si la condición es falsa, repetir: ifFalse condTemp goto startLbl
+        emit("ifFalse", condTemp, null, startLbl);
+
+        // (Opcional) podrías emitir una etiqueta de salida, pero no es estrictamente necesaria:
+        // String endLbl = newLabel();
+        // emit("label", null, null, endLbl);
+    }
+
     private void generateInstruction(TreeNode inst) {
         if (inst.getChildren().isEmpty()) return;
         String kind = inst.getChildren().get(0).getValue();
@@ -138,14 +215,13 @@ public class CodeGenerator {
                 generateIf(inst.getChildren().get(0));
                 break;
             case "ITERATIVE":
-                // Assuming WHILE_LOOP is the primary one handled, add FOR, UNTIL if needed
                 TreeNode loopTypeNode = inst.getChildren().get(0).getChildren().get(0);
                 if ("WHILE_LOOP".equals(loopTypeNode.getValue())) {
                     generateWhile(loopTypeNode);
                 } else if ("FOR_LOOP".equals(loopTypeNode.getValue())) {
-                    // generateFor(loopTypeNode); // TODO: Implement if needed
+                    generateFor(loopTypeNode); // TODO: Implement if needed
                 } else if ("UNTIL_LOOP".equals(loopTypeNode.getValue())) {
-                    // generateUntil(loopTypeNode); // TODO: Implement if needed
+                    generateUntil(loopTypeNode); // TODO: Implement if needed
                 }
                 break;
             case "ID": {

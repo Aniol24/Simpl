@@ -112,8 +112,10 @@ public class SemanticAnalyzer {
             case "IF_STATEMENT":
             case "ELIF_BLOCKS":
             case "WHILE_LOOP":
-            case "UNTIL_LOOP":
                 analyzeConditionalOrLoop(node);
+                break;
+            case "UNTIL_LOOP":
+                analyzeUntilLoop(node);
                 break;
             case "FOR_LOOP":
                 analyzeForLoop(node);
@@ -504,6 +506,31 @@ public class SemanticAnalyzer {
         } else if (hasStartEnd(node)){
             reportError(getLine(node), "Missing code block in " + node.getValue() + " statement.");
         }
+    }
+
+    private void analyzeUntilLoop(TreeNode untilNode) {
+        symbolTable.enterScope("until_loop_scope@" + getLine(untilNode));
+
+        TreeNode codeNode = findNodeAtIndex(untilNode, "CODE", 2);
+        if (codeNode != null) {
+            analyzeCodeBlock(codeNode);
+        } else {
+            reportError(getLine(untilNode), "Missing code block in UNTIL_LOOP.");
+        }
+
+        TreeNode evalNode = findNodeAtIndex(untilNode, "EVAL", 6);
+        if (evalNode != null) {
+            String condType = analyzeEval(evalNode);
+            if (condType != null && !isNumeric(condType)) {
+                reportError(getLine(evalNode),
+                        "Condition in UNTIL_LOOP must be numeric, but found '" + condType + "'.");
+            }
+        } else {
+            reportError(getLine(untilNode),
+                    "Missing condition expression (EVAL) in UNTIL_LOOP statement.");
+        }
+
+        symbolTable.exitScope();
     }
 
     private void analyzeForLoop(TreeNode forNode) {

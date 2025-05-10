@@ -31,7 +31,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        Path codePath = Paths.get("src/Files/Examples/13_FnCallCondition.smpl");
+        Path codePath = Paths.get("src/Files/Examples/code.smpl");
 
         ErrorHandler errorHandler = new ErrorHandler();
         SymbolTable symbolTable = new SymbolTable();

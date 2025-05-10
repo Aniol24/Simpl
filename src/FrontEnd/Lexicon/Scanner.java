@@ -25,7 +25,7 @@ public class Scanner {
         // devolvemos los tokens "END" pendientes.
         if (currentLine > lines.length && currentIndent > 0) {
             currentIndent--;
-            return new Token("END", currentLine);
+            return new Token("END", "END", currentLine);
         }
 
         while (currentLine <= lines.length) {
@@ -43,7 +43,7 @@ public class Scanner {
                 int indent = countLeadingTabs(line);
                 if (indent < currentIndent) {
                     currentIndent--;
-                    return new Token("END", currentLine);
+                    return new Token("END", "END", currentLine);
                 } else if (indent > currentIndent) {
                     errorHandler.recordError("Indentation error at line " + currentLine + ". Unexpected indent increase.", currentLine);
                 }
@@ -161,15 +161,15 @@ public class Scanner {
                     } else if (ch == '=') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {
                             currentPosition++;
-                            return new Token("EQUALS", currentLine);
+                            return new Token("EQUALS", "==", currentLine);
                         } else if (currentPosition < line.length() && line.charAt(currentPosition) == '>') {
                             currentPosition++;
-                            return new Token("GREATER", currentLine);
+                            return new Token("GREATER", ">=", currentLine);
                         } else if (currentPosition < line.length() && line.charAt(currentPosition) == '<') {
                             currentPosition++;
-                            return new Token("LOWER", currentLine);
+                            return new Token("LOWER", "<=", currentLine);
                         } else {
-                            return new Token("EQ", currentLine);
+                            return new Token("EQ", "=", currentLine);
                         }
                     } else if (ch == '!') {
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '=') {

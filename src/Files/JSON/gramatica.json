@@ -159,6 +159,6 @@
   },
   {
     "name": "UNTIL_LOOP",
-    "tokens": [["DO", "START", "CODE", "END", "UNTIL", "PO", "EVAL", "PT"]]
+    "tokens": [["DO", "START", "CODE", "END", "UNTIL", "PO", "EVAL", "PT", "EOL"]]
   }
 ]
