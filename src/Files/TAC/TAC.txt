@@ -1,8 +1,11 @@
 Result: main Arg1:  Arg2:  Op: label
-Result: a Arg1: 0 Arg2:  Op: =
+Result: a Arg1: 5 Arg2:  Op: =
+Result: b Arg1: 10 Arg2:  Op: =
 Result: L0 Arg1:  Arg2:  Op: label
-Result: t0 Arg1: a Arg2: 1 Op: SUM
-Result: a Arg1: t0 Arg2:  Op: =
-Result: t1 Arg1: a Arg2: 10 Op: EQUALS
-Result: L0 Arg1: t1 Arg2:  Op: ifFalse
+Result: t0 Arg1: a Arg2: b Op: LOWER
+Result: L1 Arg1: t0 Arg2:  Op: ifFalse
+Result: t1 Arg1: a Arg2: 1 Op: SUM
+Result: a Arg1: t1 Arg2:  Op: =
+Result: L0 Arg1:  Arg2:  Op: goto
+Result: L1 Arg1:  Arg2:  Op: label
 Result: end_main Arg1:  Arg2:  Op: label

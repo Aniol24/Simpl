@@ -6,6 +6,7 @@ import FrontEnd.Semantics.SemanticAnalyzer;
 import FrontEnd.Syntax.Parser;
 import Global.Errors.ErrorHandler;
 import Global.SymbolTable.SymbolTable;
+import BackEnd.MIPSCodeGenerator;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -65,8 +66,17 @@ public class Main {
             for (int i = 0; i < code.size(); i++) {
                 System.out.println(code.get(i).toString());
             }
+
+            //Generate MIPS
+            MIPSCodeGenerator mipsCodeGenerator = new MIPSCodeGenerator();
+            mipsCodeGenerator.generate(code);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+
+
     }
 }

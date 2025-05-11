@@ -77,4 +77,20 @@ public class TACInstruction {
             default: return null;
         }
     }
+
+    public String getOp() {
+        return op;
+    }
+
+    public String getArg1() {
+        return arg1;
+    }
+
+    public String getArg2() {
+        return arg2;
+    }
+
+    public String getResult() {
+        return result;
+    }
 }

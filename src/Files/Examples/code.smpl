@@ -1,7 +1,9 @@
 fn main:
-
-    int -> a = 0
-
-    do:
+    int -> a = 5
+    int -> b = 10
+    while (a < b):
         a++
-    until( a == 10)
+
+
+
+
