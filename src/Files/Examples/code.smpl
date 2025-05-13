@@ -1,9 +1,11 @@
 fn main:
+    int -> a = add()
+    int -> b = 10
+
+    return
+
+fn add -> int:
     int -> a = 5
     int -> b = 10
-    while (a < b):
-        a++
-
-
-
-
+    int -> c = a + b
+    return c

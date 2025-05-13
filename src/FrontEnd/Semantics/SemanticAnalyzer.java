@@ -230,6 +230,31 @@ public class SemanticAnalyzer {
         System.out.println("Successfully declared function signature: " + funcSymbol);
     }
 
+    private TreeNode findLastActualInstruction(TreeNode codeNode) {
+        if (codeNode == null || "EPSILON".equals(codeNode.getValue()) || codeNode.getChildren().isEmpty()) {
+            return null;
+        }
+
+        TreeNode currentLevelInstruction = null;
+        TreeNode nextLevelCode = null;
+
+        for (TreeNode child : codeNode.getChildren()) {
+            if ("INSTRUCTION".equals(child.getValue())) {
+                currentLevelInstruction = child;
+            } else if ("CODE".equals(child.getValue())) {
+                nextLevelCode = child;
+            }
+        }
+
+        if (nextLevelCode != null) {
+            TreeNode lastInstructionInNested = findLastActualInstruction(nextLevelCode);
+            if (lastInstructionInNested != null) {
+                return lastInstructionInNested; // The deepest instruction is the true last one
+            }
+        }
+
+        return currentLevelInstruction;
+    }
 
     private void analyzeFunction(TreeNode funcNode) {
         Symbol funcSymbol = symbolTable.lookupSymbol(getFunctionName(funcNode));
@@ -251,11 +276,25 @@ public class SemanticAnalyzer {
             }
         }
 
-        TreeNode codeBlock = findCodeBlock(funcNode);
+        TreeNode codeBlock = findCodeBlock(funcNode); // This should give the first CODE node
         if(codeBlock != null) {
-            analyzeCodeBlock(codeBlock);
+            analyzeCodeBlock(codeBlock); // Process the entire block first
+
+            TreeNode lastInstructionNode = findLastActualInstruction(codeBlock);
+            boolean endsWithReturn = false;
+
+            if (lastInstructionNode != null) {
+                if (findNode(lastInstructionNode, "RETURN_STATEMENT") != null) {
+                    endsWithReturn = true;
+                }
+            }
+
+            if (!endsWithReturn) {
+                reportError(getLine(funcNode), "Function '" + currentFunction.getName() + "' must end with a return statement.");
+            }
         } else {
             reportError(getLine(funcNode), "Function '" + funcSymbol.getName() + "' is missing its code block (START...END).");
+             reportError(getLine(funcNode), "Function '" + currentFunction.getName() + "' must end with a return statement (due to missing code block).");
         }
 
         symbolTable.exitScope();
@@ -275,22 +314,39 @@ public class SemanticAnalyzer {
             reportError(mainSymbol.getLineNumber(), "Main function cannot take parameters.");
         }
 
-
         Symbol previousFunction = currentFunction;
         currentFunction = mainSymbol;
 
         symbolTable.enterScope("main");
 
-        TreeNode codeBlock = findCodeBlock(mainFuncNode);
+        TreeNode codeBlock = findCodeBlock(mainFuncNode); // This should give the first CODE node
         if (codeBlock != null) {
-            analyzeCodeBlock(codeBlock);
+            analyzeCodeBlock(codeBlock); // Process the entire block first
+
+            TreeNode lastInstructionNode = findLastActualInstruction(codeBlock);
+            boolean endsWithReturn = false;
+
+            if (lastInstructionNode != null) {
+                // Check if this last INSTRUCTION node contains a RETURN_STATEMENT.
+                if (findNode(lastInstructionNode, "RETURN_STATEMENT") != null) {
+                    endsWithReturn = true;
+                }
+            }
+
+            if (!endsWithReturn) {
+                reportError(getLine(mainFuncNode), "Function '" + currentFunction.getName() + "' must end with a return statement.");
+            }
         } else {
+            // This error message might be duplicated
             reportError(getLine(mainFuncNode), "Main function is missing its code block (START...END).");
+            // If no code block, it implicitly doesn't end with a return.
+            reportError(getLine(mainFuncNode), "Function '" + currentFunction.getName() + "' must end with a return statement (due to missing code block).");
         }
 
         symbolTable.exitScope();
         currentFunction = previousFunction;
     }
+
     private List<Symbol> extractParameters(TreeNode funcPrimeNode) {
         List<Symbol> params = new ArrayList<>();
 
