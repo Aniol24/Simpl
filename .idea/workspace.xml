@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="millores en generacio TAC">
+    <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="començem a generar MIPS">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/Examples/code.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/code.smpl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Semantics/SemanticAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Semantics/SemanticAnalyzer.java" afterDir="false" />
     </list>
     <list id="8c9ea878-fd46-43de-8820-7b850b3ceac5" name="Changes by javiernajera" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -120,8 +120,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.19416.15" />
-        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-IU-241.19416.15" />
+        <option value="bundled-jdk-9f38398b9061-18abd8497189-intellij.indexing.shared.core-IU-241.14494.240" />
+        <option value="bundled-js-predefined-1d06a55b98c1-74d2a5396914-JavaScript-IU-241.14494.240" />
       </set>
     </attachedChunks>
   </component>
@@ -152,6 +152,11 @@
       <workItem from="1746692438973" duration="11579000" />
       <workItem from="1746776038585" duration="42000" />
       <workItem from="1746776092210" duration="7362000" />
+      <workItem from="1746977520140" duration="52000" />
+      <workItem from="1747131139790" duration="880000" />
+      <workItem from="1747147247884" duration="734000" />
+      <workItem from="1747302139900" duration="39000" />
+      <workItem from="1747314934872" duration="5828000" />
     </task>
     <task id="LOCAL-00001" summary="Versió 21 SDK">
       <option name="closed" value="true" />
@@ -201,7 +206,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745950607205</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="començem a generar MIPS">
+      <option name="closed" value="true" />
+      <created>1746975459686</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1746975459686</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -235,7 +248,8 @@
     <MESSAGE value="Neteja" />
     <MESSAGE value="TAC funciona parcialment (falta testing)" />
     <MESSAGE value="millores en generacio TAC" />
-    <option name="LAST_COMMIT_MESSAGE" value="millores en generacio TAC" />
+    <MESSAGE value="començem a generar MIPS" />
+    <option name="LAST_COMMIT_MESSAGE" value="començem a generar MIPS" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
