@@ -1,0 +1,8 @@
+##
+fichero para comprobar números negativos y operaciones con ellos
+##
+
+fn main:
+    int -> a = -1
+    int -> b = 1 + a
+    return

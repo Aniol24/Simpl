@@ -757,7 +757,7 @@ public class SemanticAnalyzer {
 
         TreeNode exprPrimeNode = findNode(exprNode, "EXPR_PRIME");
         while (exprPrimeNode != null && exprPrimeNode.getChildren().size() > 1) {
-            TreeNode operatorNode = exprPrimeNode.getChildren().getFirst();
+            TreeNode operatorNode = exprPrimeNode.getChildren().get(0);
             TreeNode nextTermNode = findNode(exprPrimeNode, "TERM");
 
             if (nextTermNode == null) {
@@ -889,7 +889,7 @@ public class SemanticAnalyzer {
             reportError(getLine(literalNode), "Empty literal node.");
             return null;
         }
-        TreeNode typeNode = literalNode.getChildren().getFirst();
+        TreeNode typeNode = literalNode.getChildren().get(0);
         switch (typeNode.getValue()) {
             case "INTEGER_LITERAL": return "int";
             case "FLOAT_LITERAL":   return "flt";
