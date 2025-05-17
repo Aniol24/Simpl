@@ -10,7 +10,7 @@ public class MIPSCodeGenerator {
     private PrintWriter out;
     private Map<String,Integer> localOffset;
     private Map<String,String> varType;
-    private Map<String,String> floatConstants;
+    private Map<String,String> floatConstants; // literales float a etiquetas
     private int floatConstCount;
     private int frameSize;
     private int paramCount;
@@ -18,19 +18,22 @@ public class MIPSCodeGenerator {
     public void generate(List<TACInstruction> code) throws Exception {
         Map<String,List<TACInstruction>> funcs = groupByFunction(code);
 
+        // Recolectar literales float
         floatConstants = new LinkedHashMap<>();
         floatConstCount = 0;
         for (List<TACInstruction> body : funcs.values()) {
             for (TACInstruction ins : body) {
                 if ("=".equals(ins.getOp())) {
                     String a1 = ins.getArg1();
-                    if (a1 != null && a1.matches("^-?\\d+\\.\\d+$") && !floatConstants.containsKey(a1)) {
+                    if (a1 != null && a1.matches("^-?\\d+\\.\\d+$")
+                            && !floatConstants.containsKey(a1)) {
                         floatConstants.put(a1, "LC" + (floatConstCount++));
                     }
                 }
             }
         }
 
+        // Preparar fichero de salida
         File dir = new File("out");
         if (!dir.exists()) dir.mkdirs();
         out = new PrintWriter(new File(dir, "program.s"));
@@ -71,14 +74,16 @@ public class MIPSCodeGenerator {
 
     private void emitText(Map<String,List<TACInstruction>> funcs) {
         out.println("\t.text");
-        out.println("\t.globl __start\n");
+        out.println("\t.globl __start");
         out.println("__start:");
         out.println("\tjal main\n");
 
+        // Emitimos main primero
         if (funcs.containsKey("main")) {
             emitFunction("main", funcs.get("main"));
             out.println();
         }
+        // Luego el resto de funciones
         for (String fn : funcs.keySet()) {
             if (!"main".equals(fn)) {
                 emitFunction(fn, funcs.get(fn));
@@ -91,6 +96,7 @@ public class MIPSCodeGenerator {
         this.currentFunction = fn;
         setupFrame(body);
 
+        // Prologue
         out.println(fn + ":");
         out.printf("\taddi $sp, $sp, -%d\n", frameSize);
         out.printf("\tsw   $ra, %d($sp)\n", frameSize - 4);
@@ -103,14 +109,19 @@ public class MIPSCodeGenerator {
             emitInstruction(ins);
         }
 
+        // Epílogo unificado (sin volver a ajustar $sp)
+        String exitLabel = fn + "_exit";
+        out.println(exitLabel + ":");
+        out.println("\tmove $sp, $fp");
+        out.println("\tlw   $ra, -4($fp)");
+        out.println("\tlw   $fp, -8($fp)");
+
         if ("main".equals(fn)) {
-            out.println();
-            out.println("\tmove $sp, $fp");
-            out.println("\tlw   $ra, -4($fp)");
-            out.println("\tlw   $fp, -8($fp)");
-            out.printf("\taddi $sp, $sp, %d\n", frameSize);
             out.println("\tli   $v0, 10");
             out.println("\tsyscall");
+        } else {
+            out.println("\tjr   $ra");
+            out.println("\tnop");
         }
     }
 
@@ -119,36 +130,46 @@ public class MIPSCodeGenerator {
         varType     = new LinkedHashMap<>();
         Set<String> locals = new LinkedHashSet<>();
 
+        // 1) Reunimos todos los resultados (skip labels L0, L1…)
         for (TACInstruction ins : body) {
             String res = ins.getResult();
-            if (res != null && !"label".equals(ins.getOp())) {
+            if (res != null
+                    && !"label".equals(ins.getOp())
+                    && !res.matches("^L\\d+$")) {
                 locals.add(res);
                 if ("=".equals(ins.getOp())) {
                     String a1 = ins.getArg1();
-                    if (a1 != null && a1.matches("^'.'$"))           varType.put(res, "char");
-                    else if (a1 != null && a1.matches("^-?\\d+\\.\\d+$")) varType.put(res, "float");
-                    else                                              varType.put(res, "int");
+                    if (a1 != null && a1.matches("^'.'$"))
+                        varType.put(res, "char");
+                    else if (a1 != null && a1.matches("^-?\\d+\\.\\d+$"))
+                        varType.put(res, "float");
+                    else
+                        varType.put(res, "int");
                 }
             }
         }
 
+        // 2) Asignamos offset (4 bytes cada uno)
         int off = 8;
         for (String v : locals) {
             off += 4;
             localOffset.put(v, -off);
         }
+        // 3) Redondeamos frameSize a múltiplo de 8
         frameSize = ((off + 7) / 8) * 8;
     }
 
     private void emitInstruction(TACInstruction ins) {
-        String op = ins.getOp();
-        String a1 = ins.getArg1();
-        String a2 = ins.getArg2();
+        String op  = ins.getOp();
+        String a1  = ins.getArg1();
+        String a2  = ins.getArg2();
         String res = ins.getResult();
+
         switch (op) {
             case "label":
                 out.println(res + ":");
                 break;
+
             case "param":
                 loadTo(a1);
                 if (paramCount < 4) {
@@ -159,6 +180,7 @@ public class MIPSCodeGenerator {
                 }
                 paramCount++;
                 break;
+
             case "call":
                 out.println("\tjal " + a1);
                 if (res != null) {
@@ -170,6 +192,7 @@ public class MIPSCodeGenerator {
                 }
                 paramCount = 0;
                 break;
+
             case "=":
                 if (a1 != null && a1.matches("^'.'$")) {
                     out.printf("\tli   $t0, %d\n", (int)a1.charAt(1));
@@ -182,42 +205,49 @@ public class MIPSCodeGenerator {
                 }
                 storeLocal(res);
                 break;
+
             case "SUM":
                 loadTo(a1);
                 loadToInto(a2, "$t1");
                 out.println("\tadd  $t2, $t0, $t1");
                 storeLocalTo(res, "$t2");
                 break;
+
             case "MULT":
                 loadTo(a1);
                 loadToInto(a2, "$t1");
                 out.println("\tmul  $t2, $t0, $t1");
                 storeLocalTo(res, "$t2");
                 break;
+
             case "SUB":
                 loadTo(a1);
                 loadToInto(a2, "$t1");
                 out.println("\tsub  $t2, $t0, $t1");
                 storeLocalTo(res, "$t2");
                 break;
+
             case "DIV":
                 loadTo(a1);
                 loadToInto(a2, "$t1");
                 out.println("\tdiv  $t0, $t1");
-                out.println("\tmfhi $t2");
+                out.println("\tmflo $t2");        // <-- Cociente aquí
                 storeLocalTo(res, "$t2");
                 break;
+
             case "LOWER":
                 loadTo(a1);
                 loadToInto(a2, "$t1");
                 out.println("\tslt  $t2, $t0, $t1");
                 storeLocalTo(res, "$t2");
                 break;
+
             case "NOT":
                 loadTo(a1);
                 out.println("\tseq  $t2, $t0, $zero");
                 storeLocalTo(res, "$t2");
                 break;
+
             case "AND":
                 loadTo(a1);
                 out.println("\tsne  $t0, $t0, $zero");
@@ -226,12 +256,14 @@ public class MIPSCodeGenerator {
                 out.println("\tand  $t2, $t0, $t1");
                 storeLocalTo(res, "$t2");
                 break;
+
             case "GREATER":
                 loadTo(a1);
                 loadToInto(a2, "$t1");
                 out.println("\tslt  $t2, $t1, $t0");
                 storeLocalTo(res, "$t2");
                 break;
+
             case "GREATER_EQUAL":
                 loadTo(a1);
                 loadToInto(a2, "$t1");
@@ -239,25 +271,30 @@ public class MIPSCodeGenerator {
                 out.println("\tseq  $t2, $t2, $zero");
                 storeLocalTo(res, "$t2");
                 break;
+
             case "EQUALS":
                 loadTo(a1);
                 loadToInto(a2, "$t1");
                 out.println("\tseq  $t2, $t0, $t1");
                 storeLocalTo(res, "$t2");
                 break;
+
             case "NOT_EQUAL":
                 loadTo(a1);
                 loadToInto(a2, "$t1");
                 out.println("\tsne  $t2, $t0, $t1");
                 storeLocalTo(res, "$t2");
                 break;
+
             case "ifFalse":
                 loadTo(a1);
                 out.println("\tbeq  $t0, $zero, " + res);
                 break;
+
             case "goto":
                 out.println("\tj    " + res);
                 break;
+
             case "print":
                 String type = varType.get(a1);
                 if ("float".equals(type)) {
@@ -277,20 +314,19 @@ public class MIPSCodeGenerator {
                     out.println("\tsyscall");
                 }
                 break;
+
             case "return":
                 if (ins.getArg1() != null) {
                     loadTo(ins.getArg1());
                     out.println("\tmove $v0, $t0");
                 }
-                if (!"main".equals(currentFunction)) {
-                    out.println("\tlw   $ra, -4($fp)");
-                    out.println("\tlw   $fp, -8($fp)");
-                    out.printf("\taddi $sp, $sp, %d\n", frameSize);
-                    out.println("\tjr   $ra");
-                }
+                out.println("\tj   " + currentFunction + "_exit");
+                out.println("\tnop");
                 break;
+
             default:
-                out.printf("\t# UNHANDLED: %s %s,%s -> %s\n", op, a1, a2, res);
+                out.printf("\t# UNHANDLED: %s %s,%s -> %s\n",
+                        op, a1, a2, res);
         }
     }
 
@@ -299,14 +335,13 @@ public class MIPSCodeGenerator {
         if (var.matches("param\\d+")) {
             int idx = Integer.parseInt(var.substring(5)) - 1;
             out.printf("\tmove $t0, $a%d\n", idx);
-            return;
-        }
-        if (var.matches("^-?\\d+$$")) {
+        } else if (var.matches("^-?\\d+$")) {
             out.printf("\tli   $t0, %s\n", var);
         } else if (var.matches("^'.'$")) {
             out.printf("\tli   $t0, %d\n", (int)var.charAt(1));
         } else {
-            out.printf("\tlw   $t0, %d($fp)\n", localOffset.getOrDefault(var, 0));
+            out.printf("\tlw   $t0, %d($fp)\n",
+                    localOffset.getOrDefault(var, 0));
         }
     }
 
@@ -315,20 +350,21 @@ public class MIPSCodeGenerator {
         if (var.matches("param\\d+")) {
             int idx = Integer.parseInt(var.substring(5)) - 1;
             out.printf("\tmove %s, $a%d\n", reg, idx);
-            return;
-        }
-        if (var.matches("^-?\\d+$$")) {
+        } else if (var.matches("^-?\\d+$")) {
             out.printf("\tli   %s, %s\n", reg, var);
         } else {
-            out.printf("\tlw   %s, %d($fp)\n", reg, localOffset.getOrDefault(var, 0));
+            out.printf("\tlw   %s, %d($fp)\n",
+                    reg, localOffset.getOrDefault(var, 0));
         }
     }
 
     private void storeLocal(String var) {
-        out.printf("\tsw   $t0, %d($fp)\n", localOffset.getOrDefault(var, 0));
+        out.printf("\tsw   $t0, %d($fp)\n",
+                localOffset.getOrDefault(var, 0));
     }
 
     private void storeLocalTo(String var, String reg) {
-        out.printf("\tsw   %s, %d($fp)\n", reg, localOffset.getOrDefault(var, 0));
+        out.printf("\tsw   %s, %d($fp)\n",
+                reg, localOffset.getOrDefault(var, 0));
     }
 }
