@@ -203,6 +203,16 @@ public class Scanner {
                             return new Token("SUM", currentLine);
                         }
                     } else if (ch == '-') {
+                        if (currentPosition < line.length()) {
+                            char next = line.charAt(currentPosition);
+                            if (Character.isDigit(next)) {
+                                while (currentPosition < line.length() && Character.isDigit(line.charAt(currentPosition))) {
+                                    lexeme.append(line.charAt(currentPosition));
+                                    currentPosition++;
+                                }
+                                return new Token("INTEGER_LITERAL", lexeme.toString(), currentLine);
+                            }
+                        }
                         if (currentPosition < line.length() && line.charAt(currentPosition) == '>') {
                             currentPosition++;
                             return new Token("ARROW", currentLine);

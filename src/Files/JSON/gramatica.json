@@ -119,7 +119,7 @@
   },
   {
     "name": "FACTOR",
-    "tokens": [["PO", "EVAL", "PT"], ["ID", "FACTOR_PRIME"], ["LITERAL"], ["NOT", "FACTOR"]]
+    "tokens": [["PO", "EVAL", "PT"], ["ID", "FACTOR_PRIME"], ["LITERAL"], ["NOT", "FACTOR"], ["SUB", "FACTOR"]]
   },
   {
     "name": "FACTOR_PRIME",
