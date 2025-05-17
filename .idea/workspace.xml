@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="començem a generar MIPS">
+    <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="MIPS">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/Examples/code.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/code.smpl" afterDir="false" />
@@ -156,7 +156,8 @@
       <workItem from="1747131139790" duration="880000" />
       <workItem from="1747147247884" duration="734000" />
       <workItem from="1747302139900" duration="39000" />
-      <workItem from="1747314934872" duration="5828000" />
+      <workItem from="1747314934872" duration="8107000" />
+      <workItem from="1747474078076" duration="5686000" />
     </task>
     <task id="LOCAL-00001" summary="Versió 21 SDK">
       <option name="closed" value="true" />
@@ -214,7 +215,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746975459686</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="MIPS">
+      <option name="closed" value="true" />
+      <created>1747395230222</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1747395230222</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -249,7 +258,8 @@
     <MESSAGE value="TAC funciona parcialment (falta testing)" />
     <MESSAGE value="millores en generacio TAC" />
     <MESSAGE value="començem a generar MIPS" />
-    <option name="LAST_COMMIT_MESSAGE" value="començem a generar MIPS" />
+    <MESSAGE value="MIPS" />
+    <option name="LAST_COMMIT_MESSAGE" value="MIPS" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

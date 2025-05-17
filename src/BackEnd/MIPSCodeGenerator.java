@@ -9,8 +9,8 @@ public class MIPSCodeGenerator {
     private String currentFunction = null;
     private PrintWriter out;
     private Map<String,Integer> localOffset;
-    private Map<String,String> varType;        // "int", "char" o "float"
-    private Map<String,String> floatConstants; // literales float a etiquetas
+    private Map<String,String> varType;
+    private Map<String,String> floatConstants;
     private int floatConstCount;
     private int frameSize;
     private int paramCount;
@@ -18,7 +18,6 @@ public class MIPSCodeGenerator {
     public void generate(List<TACInstruction> code) throws Exception {
         Map<String,List<TACInstruction>> funcs = groupByFunction(code);
 
-        // recolectar literales float
         floatConstants = new LinkedHashMap<>();
         floatConstCount = 0;
         for (List<TACInstruction> body : funcs.values()) {
@@ -32,7 +31,8 @@ public class MIPSCodeGenerator {
             }
         }
 
-        File dir = new File("out"); if (!dir.exists()) dir.mkdirs();
+        File dir = new File("out");
+        if (!dir.exists()) dir.mkdirs();
         out = new PrintWriter(new File(dir, "program.s"));
 
         emitData();
@@ -47,11 +47,16 @@ public class MIPSCodeGenerator {
             if ("label".equals(ins.getOp())) {
                 String lbl = ins.getResult();
                 if (current == null && lbl != null && !lbl.startsWith("end_")) {
-                    current = lbl; map.put(current, new ArrayList<>()); continue;
+                    current = lbl;
+                    map.put(current, new ArrayList<>());
+                } else if (current != null && lbl.equals("end_" + current)) {
+                    current = null;
+                } else if (current != null) {
+                    map.get(current).add(ins);
                 }
-                if (current != null && lbl.equals("end_" + current)) { current = null; continue; }
+            } else if (current != null) {
+                map.get(current).add(ins);
             }
-            if (current != null) map.get(current).add(ins);
         }
         return map;
     }
@@ -70,16 +75,22 @@ public class MIPSCodeGenerator {
         out.println("__start:");
         out.println("\tjal main\n");
 
-        if (funcs.containsKey("main")) { emitFunction("main", funcs.get("main")); out.println(); }
+        if (funcs.containsKey("main")) {
+            emitFunction("main", funcs.get("main"));
+            out.println();
+        }
         for (String fn : funcs.keySet()) {
-            if ("main".equals(fn)) continue;
-            emitFunction(fn, funcs.get(fn)); out.println();
+            if (!"main".equals(fn)) {
+                emitFunction(fn, funcs.get(fn));
+                out.println();
+            }
         }
     }
 
     private void emitFunction(String fn, List<TACInstruction> body) {
         this.currentFunction = fn;
         setupFrame(body);
+
         out.println(fn + ":");
         out.printf("\taddi $sp, $sp, -%d\n", frameSize);
         out.printf("\tsw   $ra, %d($sp)\n", frameSize - 4);
@@ -88,16 +99,18 @@ public class MIPSCodeGenerator {
         out.println();
 
         paramCount = 0;
-        for (TACInstruction ins : body) emitInstruction(ins);
+        for (TACInstruction ins : body) {
+            emitInstruction(ins);
+        }
 
         if ("main".equals(fn)) {
             out.println();
             out.println("\tmove $sp, $fp");
-            out.printf("\tlw   $ra, -4($fp)\n");
-            out.printf("\tlw   $fp, -8($fp)\n");
+            out.println("\tlw   $ra, -4($fp)");
+            out.println("\tlw   $fp, -8($fp)");
             out.printf("\taddi $sp, $sp, %d\n", frameSize);
             out.println("\tli   $v0, 10");
-            out.println("\tsyscall\n");
+            out.println("\tsyscall");
         }
     }
 
@@ -105,35 +118,62 @@ public class MIPSCodeGenerator {
         localOffset = new LinkedHashMap<>();
         varType     = new LinkedHashMap<>();
         Set<String> locals = new LinkedHashSet<>();
+
         for (TACInstruction ins : body) {
-            if ("=".equals(ins.getOp())) {
-                String res = ins.getResult();
-                if (res != null && !res.matches("t\\d+")) {
-                    locals.add(res);
+            String res = ins.getResult();
+            if (res != null && !"label".equals(ins.getOp())) {
+                locals.add(res);
+                if ("=".equals(ins.getOp())) {
                     String a1 = ins.getArg1();
-                    if (a1 != null && a1.matches("^'.'$")) varType.put(res, "char");
+                    if (a1 != null && a1.matches("^'.'$"))           varType.put(res, "char");
                     else if (a1 != null && a1.matches("^-?\\d+\\.\\d+$")) varType.put(res, "float");
-                    else varType.put(res, "int");
+                    else                                              varType.put(res, "int");
                 }
             }
         }
+
         int off = 8;
-        for (String v : locals) { off += 4; localOffset.put(v, -off); }
+        for (String v : locals) {
+            off += 4;
+            localOffset.put(v, -off);
+        }
         frameSize = ((off + 7) / 8) * 8;
     }
 
     private void emitInstruction(TACInstruction ins) {
-        String op = ins.getOp(), a1 = ins.getArg1(), a2 = ins.getArg2(), res = ins.getResult();
+        String op = ins.getOp();
+        String a1 = ins.getArg1();
+        String a2 = ins.getArg2();
+        String res = ins.getResult();
         switch (op) {
             case "label":
-                if (res != null && res.matches("L\\d+")) out.println(res + ":");
+                out.println(res + ":");
+                break;
+            case "param":
+                loadTo(a1);
+                if (paramCount < 4) {
+                    out.printf("\tmove $a%d, $t0\n", paramCount);
+                } else {
+                    out.println("\taddi $sp, $sp, -4");
+                    out.println("\tsw   $t0, 0($sp)");
+                }
+                paramCount++;
+                break;
+            case "call":
+                out.println("\tjal " + a1);
+                if (res != null) {
+                    out.println("\tmove $t0, $v0");
+                    storeLocal(res);
+                }
+                if (paramCount > 4) {
+                    out.printf("\taddi $sp, $sp, %d\n", (paramCount - 4) * 4);
+                }
+                paramCount = 0;
                 break;
             case "=":
-                // asignación
-                if (a1.matches("^'.'$")) {
-                    int ascii = a1.charAt(1);
-                    out.printf("\tli   $t0, %d     # '%c'\n", ascii, ascii);
-                } else if (floatConstants.containsKey(a1)) {
+                if (a1 != null && a1.matches("^'.'$")) {
+                    out.printf("\tli   $t0, %d\n", (int)a1.charAt(1));
+                } else if (a1 != null && floatConstants.containsKey(a1)) {
                     String lbl = floatConstants.get(a1);
                     out.printf("\tla   $t0, %s\n", lbl);
                     out.println("\tlwc1 $f0, 0($t0)");
@@ -141,6 +181,82 @@ public class MIPSCodeGenerator {
                     loadTo(a1);
                 }
                 storeLocal(res);
+                break;
+            case "SUM":
+                loadTo(a1);
+                loadToInto(a2, "$t1");
+                out.println("\tadd  $t2, $t0, $t1");
+                storeLocalTo(res, "$t2");
+                break;
+            case "MULT":
+                loadTo(a1);
+                loadToInto(a2, "$t1");
+                out.println("\tmul  $t2, $t0, $t1");
+                storeLocalTo(res, "$t2");
+                break;
+            case "SUB":
+                loadTo(a1);
+                loadToInto(a2, "$t1");
+                out.println("\tsub  $t2, $t0, $t1");
+                storeLocalTo(res, "$t2");
+                break;
+            case "DIV":
+                loadTo(a1);
+                loadToInto(a2, "$t1");
+                out.println("\tdiv  $t0, $t1");
+                out.println("\tmfhi $t2");
+                storeLocalTo(res, "$t2");
+                break;
+            case "LOWER":
+                loadTo(a1);
+                loadToInto(a2, "$t1");
+                out.println("\tslt  $t2, $t0, $t1");
+                storeLocalTo(res, "$t2");
+                break;
+            case "NOT":
+                loadTo(a1);
+                out.println("\tseq  $t2, $t0, $zero");
+                storeLocalTo(res, "$t2");
+                break;
+            case "AND":
+                loadTo(a1);
+                out.println("\tsne  $t0, $t0, $zero");
+                loadToInto(a2, "$t1");
+                out.println("\tsne  $t1, $t1, $zero");
+                out.println("\tand  $t2, $t0, $t1");
+                storeLocalTo(res, "$t2");
+                break;
+            case "GREATER":
+                loadTo(a1);
+                loadToInto(a2, "$t1");
+                out.println("\tslt  $t2, $t1, $t0");
+                storeLocalTo(res, "$t2");
+                break;
+            case "GREATER_EQUAL":
+                loadTo(a1);
+                loadToInto(a2, "$t1");
+                out.println("\tslt  $t2, $t0, $t1");
+                out.println("\tseq  $t2, $t2, $zero");
+                storeLocalTo(res, "$t2");
+                break;
+            case "EQUALS":
+                loadTo(a1);
+                loadToInto(a2, "$t1");
+                out.println("\tseq  $t2, $t0, $t1");
+                storeLocalTo(res, "$t2");
+                break;
+            case "NOT_EQUAL":
+                loadTo(a1);
+                loadToInto(a2, "$t1");
+                out.println("\tsne  $t2, $t0, $t1");
+                storeLocalTo(res, "$t2");
+                break;
+            case "ifFalse":
+                loadTo(a1);
+                out.println("\tbeq  $t0, $zero, " + res);
+                break;
+            case "goto":
+                out.println("\tj    " + res);
                 break;
             case "print":
                 String type = varType.get(a1);
@@ -155,20 +271,15 @@ public class MIPSCodeGenerator {
                     out.println("\tli   $v0, 11");
                     out.println("\tsyscall");
                 } else {
-                    loadTo(a1); // en $t0
+                    loadTo(a1);
                     out.println("\tmove $a0, $t0");
                     out.println("\tli   $v0, 1");
                     out.println("\tsyscall");
                 }
                 break;
             case "return":
-                // manejo return
-                String rt = varType.get(res);
-                if ("float".equals(rt)) {
-                    int offF = localOffset.get(res);
-                    out.printf("\tlwc1 $f0, %d($fp)\n", offF);
-                } else {
-                    loadTo(res);
+                if (ins.getArg1() != null) {
+                    loadTo(ins.getArg1());
                     out.println("\tmove $v0, $t0");
                 }
                 if (!"main".equals(currentFunction)) {
@@ -185,24 +296,39 @@ public class MIPSCodeGenerator {
 
     private void loadTo(String var) {
         if (var == null) return;
-        if (var.matches("^-?\\d+$")) {
+        if (var.matches("param\\d+")) {
+            int idx = Integer.parseInt(var.substring(5)) - 1;
+            out.printf("\tmove $t0, $a%d\n", idx);
+            return;
+        }
+        if (var.matches("^-?\\d+$$")) {
             out.printf("\tli   $t0, %s\n", var);
         } else if (var.matches("^'.'$")) {
-            int ascii = var.charAt(1);
-            out.printf("\tli   $t0, %d     # '%c'\n", ascii, ascii);
+            out.printf("\tli   $t0, %d\n", (int)var.charAt(1));
         } else {
-            int off = localOffset.getOrDefault(var, 0);
-            if ("char".equals(varType.get(var))) out.printf("\tlb   $t0, %d($fp)   # char %s\n", off, var);
-            else out.printf("\tlw   $t0, %d($fp)   # int %s\n", off, var);
+            out.printf("\tlw   $t0, %d($fp)\n", localOffset.getOrDefault(var, 0));
+        }
+    }
+
+    private void loadToInto(String var, String reg) {
+        if (var == null) return;
+        if (var.matches("param\\d+")) {
+            int idx = Integer.parseInt(var.substring(5)) - 1;
+            out.printf("\tmove %s, $a%d\n", reg, idx);
+            return;
+        }
+        if (var.matches("^-?\\d+$$")) {
+            out.printf("\tli   %s, %s\n", reg, var);
+        } else {
+            out.printf("\tlw   %s, %d($fp)\n", reg, localOffset.getOrDefault(var, 0));
         }
     }
 
     private void storeLocal(String var) {
-        if (var == null) return;
-        int off = localOffset.getOrDefault(var, 0);
-        String type = varType.get(var);
-        if ("char".equals(type)) out.printf("\tsb   $t0, %d($fp)   # char %s\n", off, var);
-        else if ("float".equals(type)) out.printf("\tswc1 $f0, %d($fp)   # float %s\n", off, var);
-        else out.printf("\tsw   $t0, %d($fp)   # int %s\n", off, var);
+        out.printf("\tsw   $t0, %d($fp)\n", localOffset.getOrDefault(var, 0));
+    }
+
+    private void storeLocalTo(String var, String reg) {
+        out.printf("\tsw   %s, %d($fp)\n", reg, localOffset.getOrDefault(var, 0));
     }
 }

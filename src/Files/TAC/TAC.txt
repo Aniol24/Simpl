@@ -1,4 +1,4 @@
 Result: main Arg1:  Arg2:  Op: label
-Result: f Arg1: 3.14 Arg2:  Op: =
+Result: x Arg1: 10 Arg2:  Op: =
 Result:  Arg1:  Arg2:  Op: return
 Result: end_main Arg1:  Arg2:  Op: label
