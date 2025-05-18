@@ -1,3 +1,9 @@
+fn test(int -> n) -> int:
+
+    return n + 1
+
 fn main:
-    int -> x = 2 > 1 & (5 > 10)
+    int -> x = test(2)
+    flt -> y = 2
+    chr -> z = 'a'
     return

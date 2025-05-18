@@ -8,13 +8,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class CodeGenerator {
+public class TACCodeGenerator {
     private int tempCount = 0;
     private int labelCount = 0;
     private final List<TACInstruction> code = new ArrayList<>();
     private final List<String[]> quads = new ArrayList<>();
 
-    public List<TACInstruction> generate(TreeNode root) {
+    private final TreeNode root;
+
+    public TACCodeGenerator(TreeNode root) {
+        this.root = root;
+    }
+
+    public void generate() {
         TreeNode inicial = root.getChildren().get(0);
         TreeNode firstFunc = inicial.getChildren().get(0);
         TreeNode funcsNode = inicial.getChildren().get(1);
@@ -26,7 +32,6 @@ public class CodeGenerator {
             processFunction(func);
         }
         writeQuadruplesToFile();
-        return code;
     }
 
     private void collectFunctions(TreeNode node, List<TreeNode> funcs) {
@@ -115,7 +120,7 @@ public class CodeGenerator {
             emit("return", retVar, null, null);
         }
 
-        emit("label", null, null, "end_" + fnName);
+        //emit("label", null, null, "end_" + fnName);
     }
 
     private void processCode(TreeNode node) {
@@ -577,7 +582,7 @@ public class CodeGenerator {
         });
     }
 
-    private void writeQuadruplesToFile() throws IOException {
+    private void writeQuadruplesToFile() {
         String dirPath = "src/Files/TAC/";
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
@@ -598,5 +603,15 @@ public class CodeGenerator {
 
     private String newLabel() {
         return "L" + (labelCount++);
+    }
+
+    public List<TACInstruction> getCode() {
+        return code;
+    }
+
+    public void printTACCode() {
+        for (TACInstruction tacInstruction : code) {
+            System.out.println(tacInstruction.toString());
+        }
     }
 }

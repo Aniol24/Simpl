@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class ErrorHandler {
 
-    private final List<Error> errors; // Changed to List for easier duplicate removal and sorting
+    private final List<Error> errors;
 
     public ErrorHandler() {
         this.errors = new LinkedList<>();
@@ -21,8 +21,6 @@ public class ErrorHandler {
     }
 
     public void recordTypeMismatchError(String location, String expectedType, int line) {
-        // 'location' parameter is not used in the original message, so I'll keep it similar.
-        // If you want to include location, the message can be "Type mismatch at '" + location + "': expected '" + expectedType + "'"
         errors.add(new Error("Type mismatch: expected '" + expectedType + "'", line));
     }
 
@@ -65,7 +63,7 @@ public class ErrorHandler {
             return;
         }
 
-        orderAndFilterErrors();
+        tidyErrors();
 
         String ANSI_RED = "\u001B[31m";
         String ANSI_RESET = "\u001B[0m";
@@ -78,15 +76,13 @@ public class ErrorHandler {
         System.out.println(ANSI_RED + lineSeparator + ANSI_RESET);
     }
 
-    private void orderAndFilterErrors() {
-        // Use a Set to remove duplicates efficiently, preserving line and message for uniqueness
+    private void tidyErrors() {
         Set<Error> uniqueErrors = new HashSet<>(errors);
         errors.clear();
         errors.addAll(uniqueErrors);
         // Sort errors by line number
         errors.sort(Comparator.comparingInt(Error::getLine));
     }
-
 
     public Boolean hasErrors() {
         return !errors.isEmpty();

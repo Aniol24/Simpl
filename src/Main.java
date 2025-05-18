@@ -1,4 +1,4 @@
-import FrontEnd.TAC.CodeGenerator;
+import FrontEnd.TAC.TACCodeGenerator;
 import FrontEnd.TAC.TACInstruction;
 import FrontEnd.Lexicon.Scanner;
 import FrontEnd.Preprocessor.Preprocessor;
@@ -28,7 +28,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        Path codePath = Paths.get("src/Files/Examples/fibonacci.smpl");
+        Path codePath = Paths.get("src/Files/Examples/code.smpl");
 
         ErrorHandler errorHandler = new ErrorHandler();
         SymbolTable symbolTable = new SymbolTable();
@@ -51,19 +51,19 @@ public class Main {
 
         semanticAnalyzer.printSymbolTableContents();
 
+        // Check for errors, stop if any
         if (errorHandler.hasErrors()) {
             errorHandler.printErrors();
             return;
         }
 
-        CodeGenerator gen = new CodeGenerator();
-        List<TACInstruction> code = gen.generate(parser.getParseTreeRoot());
-        for (int i = 0; i < code.size(); i++) {
-            System.out.println(code.get(i).toString());
-        }
+        // Generate TAC
+        TACCodeGenerator tacCodeGenerator = new TACCodeGenerator(parser.getParseTreeRoot());
+        tacCodeGenerator.generate();
+        tacCodeGenerator.printTACCode();
 
-        //Generate MIPS
-        MIPSCodeGenerator mipsCodeGenerator = new MIPSCodeGenerator();
-        mipsCodeGenerator.generate(code);
+        // Generate MIPS
+        MIPSCodeGenerator mipsCodeGenerator = new MIPSCodeGenerator(tacCodeGenerator.getCode(), symbolTable);
+        mipsCodeGenerator.generate();
     }
 }

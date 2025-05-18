@@ -57,6 +57,10 @@ public class SymbolTable {
         return globalScope;
     }
 
+    public List<Scope> getAllScopes() {
+        return allScopes;
+    }
+
     public void printAllScopesDetails() {
         System.out.println("\n--- Symbol Table Dump ---");
         if (allScopes.isEmpty()) {

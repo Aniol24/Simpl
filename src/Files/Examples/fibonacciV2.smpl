@@ -1,8 +1,12 @@
-fn fibonacci (int -> n) -> int:
-    if (n <= 0):
-        return 1
-    return n + fibonacci(n - 1)
+fn fibonacci_tail(int -> n, int -> a, int -> b) -> int:
+    if (n == 0):
+        return a
+    return fibonacci_tail(n - 1, b, a + b)
+
+fn fibonacci(int -> n) -> int:
+    return fibonacci_tail(n, 0, 1)
 
 fn main:
-    int -> result = fibonacci(5)
+    int -> x = fibonacci(11)
     return
+

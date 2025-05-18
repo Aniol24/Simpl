@@ -7,11 +7,15 @@
     <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="MIPS">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/Examples/12_LogicalOperators.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/12_LogicalOperators.smpl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/Examples/code.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/code.smpl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/Examples/fibonacci.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/fibonacci.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/fibonacciV2.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/fibonacciV2.smpl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Semantics/SemanticAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Semantics/SemanticAnalyzer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/TAC/CodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/TAC/TACCodeGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Global/Errors/Error.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/Errors/Error.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Global/Errors/ErrorHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/Errors/ErrorHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Global/Errors/SimplException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Global/SymbolTable/SymbolTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/SymbolTable/SymbolTable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
     <list id="8c9ea878-fd46-43de-8820-7b850b3ceac5" name="Changes by javiernajera" comment="" />
