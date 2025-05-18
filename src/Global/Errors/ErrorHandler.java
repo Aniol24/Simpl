@@ -10,54 +10,31 @@ import java.util.Set;
 
 public class ErrorHandler {
 
+    /**
+     * Llista d'errors
+     */
     private final List<Error> errors;
 
+    /**
+     * Constructor de la classe ErrorHandler
+     */
     public ErrorHandler() {
         this.errors = new LinkedList<>();
     }
 
+    /**
+     * Registra un error
+     *
+     * @param message el missatge d'error
+     * @param line    la línia on es troba l'error
+     */
     public void recordError(String message, int line) {
         errors.add(new Error(message, line));
     }
 
-    public void recordTypeMismatchError(String location, String expectedType, int line) {
-        errors.add(new Error("Type mismatch: expected '" + expectedType + "'", line));
-    }
-
-    public void recordParameterMismatchError(String funcName, int expectedParams, int gotParams, int line) {
-        errors.add(new Error("Parameter count mismatch for function '" + funcName + "': expected " + expectedParams + ", got " + gotParams, line));
-    }
-
-    public void recordMissingReturnError(String funcName, int line) {
-        errors.add(new Error("Missing return value in function '" + funcName + "'", line));
-    }
-
     /**
-     * Records invalid return error.
-     *
-     * @param funcName the function name
-     * @param line     the line number
+     * Mostra els errors registrats
      */
-    public void recordInvalidReturnError(String funcName, int line) {
-        errors.add(new Error("Invalid return value in function '" + funcName + "'", line));
-    }
-
-    public void recordConditionError(int line) {
-        errors.add(new Error("Condition types do not match", line));
-    }
-
-    public void recordFunctionIsNotDeclared(Token token) {
-        errors.add(new Error("Function '" + token.getValue() + "' not declared", token.getLine()));
-    }
-
-    public void recordVariableDoesntExist(Token token) {
-        errors.add(new Error("Variable '" + token.getValue() + "' not declared", token.getLine()));
-    }
-
-    public void recordVariableAlreadyDeclared(Token token) {
-        errors.add(new Error("Variable '" + token.getValue() + "' already declared", token.getLine()));
-    }
-
     public void printErrors() {
         if (errors.isEmpty()) {
             return;
@@ -76,19 +53,23 @@ public class ErrorHandler {
         System.out.println(ANSI_RED + lineSeparator + ANSI_RESET);
     }
 
+    /**
+     * Esborra els errors duplicats i els ordena
+     */
     private void tidyErrors() {
         Set<Error> uniqueErrors = new HashSet<>(errors);
         errors.clear();
         errors.addAll(uniqueErrors);
-        // Sort errors by line number
+        // Ordenem els errors per línia
         errors.sort(Comparator.comparingInt(Error::getLine));
     }
 
+    /**
+     * Retorna si hi ha errors
+     *
+     * @return true si hi ha errors, false si no
+     */
     public Boolean hasErrors() {
         return !errors.isEmpty();
-    }
-
-    public void recordFunctionAlreadyExists(Token token) {
-        errors.add(new Error("Function '" + token.getValue() + "' already exists", token.getLine()));
     }
 }

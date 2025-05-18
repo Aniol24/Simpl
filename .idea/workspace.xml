@@ -5,11 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="MIPS">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/SemanticTest.smpl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/SemanticTest2.smpl" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/Examples/test.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/test.smpl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Lexicon/Token.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Lexicon/Token.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Preprocessor/Preprocessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Preprocessor/Preprocessor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Semantics/SemanticAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Semantics/SemanticAnalyzer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Syntax/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Syntax/Parser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Syntax/ParsingTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Syntax/ParsingTable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/TAC/TACCodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/TAC/TACCodeGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Global/Errors/Error.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/Errors/Error.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Global/Errors/ErrorHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/Errors/ErrorHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Global/SymbolTable/Scope.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/SymbolTable/Scope.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Global/SymbolTable/Symbol.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/SymbolTable/Symbol.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Global/SymbolTable/SymbolTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/SymbolTable/SymbolTable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
     <list id="8c9ea878-fd46-43de-8820-7b850b3ceac5" name="Changes by javiernajera" comment="" />
     <option name="SHOW_DIALOG" value="false" />

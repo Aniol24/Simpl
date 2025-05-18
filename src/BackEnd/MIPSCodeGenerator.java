@@ -3,7 +3,6 @@ package BackEnd;
 import FrontEnd.TAC.TACInstruction;
 import Global.SymbolTable.Symbol;
 import Global.SymbolTable.SymbolTable;
-import Global.SymbolTable.Scope;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -16,9 +15,9 @@ public class MIPSCodeGenerator {
     private Map<String,Integer> localOffset;
     private Map<String,String> varType;
     private Map<String,String> floatConstants; // literales float a etiquetas
-    private int floatConstCount;
     private int frameSize;
     private int paramCount;
+    private boolean commentTAC = false;
 
     private final List<TACInstruction> TACCode;
     private final SymbolTable symbolTable;
@@ -28,11 +27,15 @@ public class MIPSCodeGenerator {
         this.symbolTable = symbolTable;
     }
 
+    public void setCommentTAC(boolean commentTAC) {
+        this.commentTAC = commentTAC;
+    }
+
     public void generate() {
         Map<String,List<TACInstruction>> funcs = groupByFunction(TACCode);
 
         floatConstants = new LinkedHashMap<>();
-        floatConstCount = 0;
+        int floatConstCount = 0;
         for (TACInstruction ins : TACCode) {
             String a1Val = ins.getArg1();
             // Check arg1 for float literal
@@ -50,7 +53,7 @@ public class MIPSCodeGenerator {
         File dir = new File("out");
         if (!dir.exists()) dir.mkdirs();
         try {
-            out = new PrintWriter(new File(dir, "program.s"));
+            out = new PrintWriter(new File(dir, "program.asm"));
 
             emitData();
             emitText(funcs);
@@ -65,6 +68,7 @@ public class MIPSCodeGenerator {
         String currentFuncLabel = null;
 
         for (TACInstruction ins : code) {
+
             if ("label".equals(ins.getOp())) {
                 String lbl = ins.getResult();
                 if (lbl == null) continue;
@@ -101,7 +105,6 @@ public class MIPSCodeGenerator {
         out.println("\tjal main");
         out.println();
 
-
         if (funcs.containsKey("main")) {
             emitFunction("main", funcs.get("main"));
             out.println();
@@ -120,7 +123,7 @@ public class MIPSCodeGenerator {
 
         if (this.currentFunctionSym == null || !this.currentFunctionSym.isFunction()) {
             System.err.println("MIPS Gen Error: Function symbol not found for " + fnName);
-            setupFrame(body, null); 
+            setupFrame(body, null);
         } else {
             setupFrame(body, this.currentFunctionSym);
         }
@@ -132,29 +135,46 @@ public class MIPSCodeGenerator {
         out.printf("\taddi $fp, $sp, %d\n", frameSize);
         out.println();
 
-        paramCount = 0; 
+        paramCount = 0;
         for (TACInstruction ins : body) {
             // Skip the initial function label as it's already handled by out.println(fnName + ":");
             if ("label".equals(ins.getOp()) && ins.getResult().equals(fnName)) continue;
             emitInstruction(ins);
         }
 
-        out.println(fnName + "_exit:"); 
-        out.println("\tmove $sp, $fp"); 
-        out.println("\tlw   $ra, -4($fp)"); 
-        out.println("\tlw   $fp, -8($fp)"); 
+        out.println(fnName + "_exit:");
+        out.println("\tmove $sp, $fp");
+        out.println("\tlw   $ra, -4($fp)");
+        out.println("\tlw   $fp, -8($fp)");
 
         if ("main".equals(fnName)) {
             out.println("\tli   $v0, 10");
             out.println("\tsyscall");
         } else {
             out.println("\tjr   $ra");
-            out.println("\tnop"); 
+            out.println("\tnop");
         }
     }
 
     private void emitInstruction(TACInstruction ins) {
-        String op  = ins.getOp();
+
+        if (commentTAC)
+            out.printf("\n\t# TAC: %s\n", ins.toString());
+
+        String opKey = ins.getOp();
+        switch (opKey) {
+            case "<":   opKey = "LOWER";          break;
+            case ">":   opKey = "GREATER";        break;
+            case "<=":  opKey = "LOWER_EQUAL";    break;
+            case ">=":  opKey = "GREATER_EQUAL";  break;
+            case "==":  opKey = "EQUALS";         break;
+            case "!=":  opKey = "NOT_EQUAL";      break;
+            case "&&":  opKey = "AND";            break;
+            case "||":  opKey = "OR";             break;
+            default:    /* leave opKey as is */   break;
+        }
+
+        String op  = opKey;
         String a1  = ins.getArg1();
         String a2  = ins.getArg2();
         String res = ins.getResult();
@@ -218,11 +238,12 @@ public class MIPSCodeGenerator {
                     loadOperandToFPU(a1, "$f16"); // Load a1 into a temp FPU reg
                     storeFPUResult(res, "$f16");   // Store it to res
                 } else { // int or char
-                     // loadOperandToGPR handles char literals correctly if a1 is like 'c'
+                    // loadOperandToGPR handles char literals correctly if a1 is like 'c'
                     loadOperandToGPR(a1, "$t2"); // Load a1 into a temp GPR
                     storeGPRResult(res, "$t2");    // Store it to res
                 }
                 break;
+
 
             case "SUM":
             case "SUB":
@@ -276,7 +297,7 @@ public class MIPSCodeGenerator {
                 out.println("\tslt  $t2, $t0, $t1");
                 storeGPRResult(res, "$t2");
                 break;
-            
+
             case "LOWER_EQUAL":
                 loadOperandToGPR(a1, "$t0");
                 loadOperandToGPR(a2, "$t1");
@@ -292,10 +313,10 @@ public class MIPSCodeGenerator {
 
             case "AND":
                 loadOperandToGPR(a1, "$t0");
-                out.println("\tsne  $t0, $t0, $zero"); // $t0 = (a1 != 0)
+                out.println("\tsne  $t0, $t0, $zero");    // $t0 = (a1 != 0)
                 loadOperandToGPR(a2, "$t1");
-                out.println("\tsne  $t1, $t1, $zero"); // $t1 = (a2 != 0)
-                out.println("\tand  $t2, $t0, $t1");
+                out.println("\tsne  $t1, $t1, $zero");    // $t1 = (a2 != 0)
+                out.println("\tand  $t2, $t0, $t1");      // $t2 = $t0 && $t1
                 storeGPRResult(res, "$t2");
                 break;
 
@@ -371,6 +392,17 @@ public class MIPSCodeGenerator {
                 out.println("\tnop");
                 break;
 
+
+
+            case "OR":
+                loadOperandToGPR(a1, "$t0");
+                out.println("\tsne  $t0, $t0, $zero");    // $t0 = (a1 != 0)
+                loadOperandToGPR(a2, "$t1");
+                out.println("\tsne  $t1, $t1, $zero");    // $t1 = (a2 != 0)
+                out.println("\tor   $t2, $t0, $t1");      // $t2 = $t0 || $t1
+                storeGPRResult(res, "$t2");
+                break;
+
             default:
                 out.printf("\t# UNHANDLED: %s %s,%s -> %s\n",
                         op, a1, a2, res);
@@ -387,7 +419,7 @@ public class MIPSCodeGenerator {
         if (operand.matches("^-?\\d+\\.\\d+$") || floatConstants.containsKey(operand)) return "flt";
         if (operand.matches("^-?\\d+$")) return "int";
         if (operand.matches("^'.'$")) return "chr";
-        
+
         // Fallback if not in varType (e.g. direct param use, though setupFrame should cover most)
         Symbol s = symbolTable.lookupSymbol(operand); // General lookup
         if (s != null && !s.isFunction()) {
@@ -413,12 +445,12 @@ public class MIPSCodeGenerator {
             if (idx >= 0 && idx < 4) { // Params in $a0-$a3
                 out.printf("\tmove %s, $a%d\n", targetGPR, idx);
             } else { // Params on stack relative to $fp
-                 // This calculation needs to be correct based on your calling convention
-                 // For parameters passed by caller *before* current frame is set up:
-                 // They are at positive offsets from $fp if $fp points to old $fp.
-                 // If $fp points to base of current frame, and params are above $ra, $fp:
-                 // e.g. $fp+8, $fp+12 ...
-                 // For now, assuming a convention where they are accessible; this needs review.
+                // This calculation needs to be correct based on your calling convention
+                // For parameters passed by caller *before* current frame is set up:
+                // They are at positive offsets from $fp if $fp points to old $fp.
+                // If $fp points to base of current frame, and params are above $ra, $fp:
+                // e.g. $fp+8, $fp+12 ...
+                // For now, assuming a convention where they are accessible; this needs review.
                 out.printf("\tlw   %s, %d($fp) # Accessing stacked param %s\n", targetGPR, 8 + (idx - 4) * 4, operand);
             }
         } else if (operand.matches("^-?\\d+$")) { // Integer literal
@@ -456,9 +488,9 @@ public class MIPSCodeGenerator {
         } else if ("flt".equals(type)) { // Float variable
             Integer offset = localOffset.get(operand);
             if (offset == null) {
-                 out.printf("\tli   $t9, 0 # Error: %s not in localOffset for FPU load\n", operand); // Use a GPR temp
-                 out.printf("\tmtc1 $t9, %s\n", targetFPR);
-                 out.printf("\tcvt.s.w %s, %s\n", targetFPR, targetFPR); 
+                out.printf("\tli   $t9, 0 # Error: %s not in localOffset for FPU load\n", operand); // Use a GPR temp
+                out.printf("\tmtc1 $t9, %s\n", targetFPR);
+                out.printf("\tcvt.s.w %s, %s\n", targetFPR, targetFPR);
             } else {
                 out.printf("\tlwc1 %s, %d($fp)\n", targetFPR, offset);
             }
@@ -466,9 +498,9 @@ public class MIPSCodeGenerator {
             String tempGPR = "$t9"; // Use a GPR temp for loading int/char
             // Load int/char to GPR first (simplified, not calling loadOperandToGPR to avoid recursion issues with param handling)
             if (operand.matches("^-?\\d+$")) {
-                 out.printf("\tli   %s, %s\n", tempGPR, operand);
+                out.printf("\tli   %s, %s\n", tempGPR, operand);
             } else if (operand.matches("^'.'$")) {
-                 out.printf("\tli   %s, %d\n", tempGPR, (int) operand.charAt(1));
+                out.printf("\tli   %s, %d\n", tempGPR, (int) operand.charAt(1));
             } else if (operand.matches("param\\d+")) {
                 // Simplified param handling for this path, assuming it's an int param
                 int idx = Integer.parseInt(operand.substring(5)) - 1;
@@ -505,7 +537,7 @@ public class MIPSCodeGenerator {
 
     private void setupFrame(List<TACInstruction> body, Symbol functionSymbol) {
         localOffset = new LinkedHashMap<>();
-        varType = new LinkedHashMap<>(); 
+        varType = new LinkedHashMap<>();
         Set<String> frameVariables = new LinkedHashSet<>(); // All vars needing stack space
 
         // 1. Process parameters from functionSymbol
@@ -564,9 +596,9 @@ public class MIPSCodeGenerator {
                                 // If a function returns "void", its result shouldn't be assigned in TAC.
                                 // If it is, defaulting to "int" or the actual return type.
                                 if (retType != null && !retType.equalsIgnoreCase("void")) {
-                                   inferredType = retType;
+                                    inferredType = retType;
                                 } else {
-                                   inferredType = "int"; // Default for void return or if not specified
+                                    inferredType = "int"; // Default for void return or if not specified
                                 }
                             }
                         }
@@ -575,7 +607,7 @@ public class MIPSCodeGenerator {
                 }
             }
         }
-        
+
         // Fallback: Ensure all variables that ended up in frameVariables have a type.
         // This typically covers variables that might be used but not explicitly assigned a type above
         // (e.g. parameters used directly without being a 'res' in an assignment from paramN, though handled by param processing).
@@ -608,7 +640,7 @@ public class MIPSCodeGenerator {
         if (frameSize < 8) frameSize = 8; // Ensure minimum size if no locals
     }
 
-    private String getVarOrLiteralType(String operand, SymbolTable symTable, Map<String, String> varTypeMap, 
+    private String getVarOrLiteralType(String operand, SymbolTable symTable, Map<String, String> varTypeMap,
                                        Map<String, String> floatLits, Symbol currentFunctionSym) {
         if (operand == null) return "int"; // Default for null operand, though ideally should not happen.
 
@@ -626,7 +658,7 @@ public class MIPSCodeGenerator {
             varTypeMap.put(operand, s.getType()); // Cache it for future lookups in this function
             return s.getType();
         }
-        
+
         // 4. Handle direct use of "paramN" (e.g. if TAC was "t0 = param1 + ...")
         //    This is less likely if TAC convention is "formalName = paramN"
         if (operand.startsWith("param") && currentFunctionSym != null && currentFunctionSym.isFunction()) {
@@ -641,6 +673,6 @@ public class MIPSCodeGenerator {
             } catch (NumberFormatException e) { /* Not a valid "paramN" format, ignore */ }
         }
 
-        return "int"; 
+        return "int";
     }
 }

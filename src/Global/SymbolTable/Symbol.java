@@ -4,14 +4,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Symbol {
-    private String name;
-    private String type; // "int", "flt", "chr", "function"
+    /**
+     * Nom del símbol
+     */
+    private final String name;
+    /**
+     * Tipus del símbol
+     */
+    private final String type; // "int", "flt", "chr", "function"
+    /**
+     * Indica si el símbol ha estat inicialitzat
+     */
     private boolean initialized;
-    private int lineNumber;
-    private String returnType; // for functions
-    private List<Symbol> parameters; // for functions
+    /**
+     * Número de línia on es troba el símbol
+     */
+    private final int lineNumber;
+    /**
+     * Tipus de retorn del símbol (només per a funcions)
+     */
+    private final String returnType;
+    /**
+     * Paràmetres del símbol (només per a funcions)
+     */
+    private final List<Symbol> parameters;
 
-    // Constructor for variables
+    /**
+     * Constructor per a variables
+     * @param name Nom de la variable
+     * @param type Tipus de la variable
+     * @param lineNumber Número de línia on es troba la variable
+     */
     public Symbol(String name, String type, int lineNumber) {
         this.name = name;
         this.type = type;
@@ -21,24 +44,84 @@ public class Symbol {
         this.parameters = null;
     }
 
-    // Constructor for functions
+    /**
+     * Constructor per a funcions
+     * @param name Nom de la funció
+     * @param returnType Tipus de retorn de la funció
+     * @param lineNumber Número de línia on es troba la funció
+     * @param parameters Paràmetres de la funció
+     */
     public Symbol(String name, String returnType, int lineNumber, List<Symbol> parameters) {
         this.name = name;
         this.type = "function";
-        this.initialized = true; // Functions are always initialized
+        this.initialized = true;
         this.lineNumber = lineNumber;
         this.returnType = returnType;
         this.parameters = parameters;
     }
 
-    public String getName() { return name; }
-    public String getType() { return type; }
-    public boolean isInitialized() { return initialized; }
-    public void setInitialized(boolean initialized) { this.initialized = initialized; }
-    public int getLineNumber() { return lineNumber; }
-    public String getReturnType() { return returnType; }
-    public List<Symbol> getParameters() { return parameters; }
-    public boolean isFunction() { return "function".equals(type); }
+    /**
+     * Retorna el nom del símbol
+     * @return Nom del símbol
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Retorna el tipus del símbol
+     * @return Tipus del símbol
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * Retorna si el símbol ha estat inicialitzat
+     * @return true si el símbol ha estat inicialitzat, false en cas contrari
+     */
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    /**
+     * Marca el símbol com a inicialitzat / no inicialitzat
+     */
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
+    }
+
+    /**
+     * Retorna el número de línia on es troba el símbol
+     * @return Número de línia
+     */
+    public int getLineNumber() {
+        return lineNumber;
+    }
+
+    /**
+     * Retorna el tipus de retorn del símbol (només per a funcions)
+     * @return Tipus de retorn
+     */
+    public String getReturnType() {
+        return returnType;
+    }
+
+    /**
+     * Retorna els paràmetres del símbol (només per a funcions)
+     * @return Paràmetres
+     */
+    public List<Symbol> getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Retorna si el símbol és una funció
+     * @return true si el símbol és una funció, false en cas contrari
+     */
+    public boolean isFunction() {
+        return "function".equals(type);
+    }
 
     @Override
     public String toString() {

@@ -677,8 +677,10 @@ public class TACCodeGenerator {
     }
 
     public void printTACCode() {
+        System.out.println("--- TAC Code ---");
         for (TACInstruction tacInstruction : code) {
             System.out.println(tacInstruction.toString());
         }
+        System.out.println("--- End of TAC Code ---");
     }
 }

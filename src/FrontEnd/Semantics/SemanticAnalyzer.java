@@ -22,9 +22,7 @@ public class SemanticAnalyzer {
     }
 
     public void analyze() {
-        System.out.println("Starting semantic analysis...");
         analyzeNode(root);
-        System.out.println("Semantic analysis completed.");
     }
 
     private void analyzeNode(TreeNode node) {
@@ -225,9 +223,7 @@ public class SemanticAnalyzer {
         if (!globalScope.declareSymbol(funcSymbol)) {
             Symbol existing = globalScope.lookupSymbol(funcName);
             reportError(line, "Function '" + funcName + "' already declared globally at line " + (existing != null ? existing.getLineNumber() : "?"));
-            return;
         }
-        System.out.println("Successfully declared function signature: " + funcSymbol);
     }
 
     private TreeNode findLastActualInstruction(TreeNode codeNode) {

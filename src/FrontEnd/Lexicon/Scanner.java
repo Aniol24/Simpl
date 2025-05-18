@@ -4,13 +4,33 @@ import Global.Errors.ErrorHandler;
 
 public class Scanner {
 
+    /**
+     * ErrorHandler per a gestionar errors
+     */
     private final ErrorHandler errorHandler;
-
+    /**
+     * Conté el codi font a analitzar
+     */
     private final String[] lines;
+    /**
+     * Conté la línia actual a analitzar
+     */
     private int currentLine;
+    /**
+     * Conté la posició actual a la línia
+     */
     private int currentPosition;
+    /**
+     * Conté la indentació actual
+     */
     private int currentIndent;
 
+    /**
+     * Constructor de la classe Scanner
+     *
+     * @param code         Codi font a analitzar
+     * @param errorHandler ErrorHandler per a gestionar errors
+     */
     public Scanner(String code, ErrorHandler errorHandler) {
         this.errorHandler = errorHandler;
 
@@ -20,9 +40,13 @@ public class Scanner {
         this.currentIndent = 0;
     }
 
+    /**
+     * Retorna el següent token del codi font
+     *
+     * @return Token següent
+     */
     public Token nextToken() {
-        // Si ya se han procesado todas las líneas, pero quedan bloques abiertos,
-        // devolvemos los tokens "END" pendientes.
+        // Si ja no queden línies, però encara hi ha blocs oberts, es retorna els tokens "END" pendents
         if (currentLine > lines.length && currentIndent > 0) {
             currentIndent--;
             return new Token("END", "END", currentLine);
@@ -31,14 +55,14 @@ public class Scanner {
         while (currentLine <= lines.length) {
             String line = getCurrentLine();
 
-            // Salta líneas vacías.
+            // Salta línees buides
             if (line.trim().isEmpty()) {
                 currentLine++;
                 currentPosition = 0;
                 continue;
             }
 
-            // Comprobación de indentación al inicio de la línea.
+            // Comprovem indentació
             if (currentPosition == 0) {
                 int indent = countLeadingTabs(line);
                 if (indent < currentIndent) {
@@ -51,7 +75,7 @@ public class Scanner {
 
             if (currentPosition < line.length()) {
                 char ch = line.charAt(currentPosition);
-                // Salta espacios y tabulaciones.
+                // Salta espais i tabulacions
                 if (ch == ' ' || ch == '\t') {
                     currentPosition++;
                     continue;
@@ -59,7 +83,7 @@ public class Scanner {
 
                 StringBuilder lexeme = new StringBuilder();
 
-                // Procesamiento de identificadores
+                // Processament d'identificadors i paraules reservades
                 if (Character.isLetter(ch) || ch == '_') {
                     while (currentPosition < line.length() && (Character.isLetterOrDigit(line.charAt(currentPosition)) || (line.charAt(currentPosition) == '_'))) {
                         lexeme.append(line.charAt(currentPosition));
@@ -67,7 +91,6 @@ public class Scanner {
                     }
                     String word = lexeme.toString();
 
-                    // Procesamiento de palabras reservadas
                     switch (word) {
                         case "main" -> {
                             return new Token("MAIN", word, currentLine);
@@ -113,7 +136,7 @@ public class Scanner {
                         }
                     }
                 }
-                // Procesamiento de números
+                // Processem números enters i decimals
                 else if (Character.isDigit(ch)) {
                     while (currentPosition < line.length() && Character.isDigit(line.charAt(currentPosition))) {
                         lexeme.append(line.charAt(currentPosition));
@@ -132,7 +155,7 @@ public class Scanner {
                     }
                     return new Token("INTEGER_LITERAL", lexeme.toString(), currentLine);
                 }
-                // Procesamiento de símbolos
+                // Processament de símbols
                 else {
                     lexeme.append(ch);
                     currentPosition++;
@@ -258,13 +281,13 @@ public class Scanner {
                     }
                 }
             }
-            // Fin de la línea actual: se retorna EOL y se pasa a la siguiente línea.
+            // Fi de la línia actual, es retorna un token "EOL" i es passa a la següent línia
             currentLine++;
             currentPosition = 0;
             return new Token("EOL", currentLine);
         }
 
-        // Si ya no quedan líneas pero aún quedan bloques abiertos, se retornan los tokens "END".
+        // Si ja no queden línies, però encara hi ha blocs oberts, es retorna els tokens "END" pendents
         if (currentIndent > 0) {
             currentIndent--;
             return new Token("END", currentLine);
@@ -272,6 +295,12 @@ public class Scanner {
         return new Token("EOF", currentLine);
     }
 
+    /**
+     * Compta el nombre de tabulacions i espais al principi d'una línia
+     *
+     * @param line Línia a analitzar
+     * @return Nombre de tabulacions i espais al principi de la línia
+     */
     private static int countLeadingTabs(String line) {
         int count = 0;
         int spaceCount = 0;
@@ -292,6 +321,11 @@ public class Scanner {
         return count;
     }
 
+    /**
+     * Retorna la línia actual a analitzar
+     *
+     * @return Línia actual
+     */
     private String getCurrentLine() {
         if (currentLine - 1 < lines.length) {
             return lines[currentLine - 1];

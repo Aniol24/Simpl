@@ -7,14 +7,38 @@ import Global.Errors.ErrorHandler;
 
 public class Parser {
 
+    /**
+     * ErrorHandler: Error handler
+     */
     private final ErrorHandler errorHandler;
 
+    /**
+     * Scanner per a passar els tokens al parser
+     */
     private final Scanner scanner;
+    /**
+     * Taula de parsing
+     */
     private final Map<String, Map<String, List<String>>> parsingTable;
+    /**
+     * Stack per a guardar els tokens
+     */
     private final Stack<Token> stack = new Stack<>();
+    /**
+     * Stack per a guardar els nodes
+     */
     private final Stack<TreeNode> nodeStack = new Stack<>();
+    /**
+     * Arbre de parsing
+     */
     private TreeNode parseTreeRoot;
 
+    /**
+     * Constructor del parser
+     *
+     * @param scanner       Scanner per a passar els tokens al parser
+     * @param errorHandler  Error handler
+     */
     public Parser(Scanner scanner, ErrorHandler errorHandler) {
         this.errorHandler = errorHandler;
 
@@ -23,6 +47,9 @@ public class Parser {
         this.parsingTable = pt.getParsingTable();
     }
 
+    /**
+     * Inicia el parser
+     */
     public void parse() {
         stack.push(new Token("INICIAL", 0));
         parseTreeRoot = new TreeNode(new Token("ROOT", 0));
@@ -32,14 +59,9 @@ public class Parser {
         nodeStack.push(initialNode);
 
         Token token = scanner.nextToken();
-        System.out.println("Token value: " + token.getValue());
-        System.out.println("Token attribute: " + token.getAttribute());
-        System.out.println("Token line: " + token.getLine());
-        System.out.println("\n\n");
 
         while (!stack.isEmpty()) {
-            printStack(stack);
-            System.out.printf("Token actual: %s\n", token.getValue());
+            // printStack(stack); // Mostrem el stack (debug)
             Token top = stack.peek();
 
             if (top.getValue().equals(token.getValue())) {
@@ -50,10 +72,6 @@ public class Parser {
                 stack.pop();
                 nodeStack.pop();
                 token = scanner.nextToken();
-                System.out.println("Token value: " + token.getValue());
-                System.out.println("Token attribute: " + token.getAttribute());
-                System.out.println("Token line: " + token.getLine());
-                System.out.println("\n\n");
                 continue;
             }
 
@@ -72,7 +90,7 @@ public class Parser {
             stack.pop();
             TreeNode parentNode = nodeStack.pop();
 
-            // No duplicamos el símbolo si ya lo contiene el nodo padre
+            // No dupliquem el símbol si ja té node pare
             TreeNode nonTerminalNode = parentNode.getValue().equals(top.getValue()) ? parentNode : new TreeNode(top);
             if (nonTerminalNode != parentNode) {
                 parentNode.addChild(nonTerminalNode);
@@ -93,21 +111,46 @@ public class Parser {
                 }
             }
         }
-
-        System.out.println("✅ INPUT CORRECTO ✅");
-        System.out.println("\nÁrbol de derivación:");
-        printTree(parseTreeRoot, "", true);
     }
 
+    /**
+     * Obté la producció de la taula de parsing
+     *
+     * @param nonTerminal Non terminal
+     * @param terminal    Terminal
+     * @return Producció
+     */
     private List<String> getProduction(String nonTerminal, String terminal) {
         Map<String, List<String>> row = parsingTable.get(nonTerminal);
         return row != null ? row.get(terminal) : null;
     }
 
+    /**
+     * Comprova si un símbol és terminal
+     *
+     * @param symbol Símbol
+     * @return true si és terminal, false si no
+     */
     private boolean isTerminal(String symbol) {
         return !parsingTable.containsKey(symbol);
     }
 
+    /**
+     * Mostra l'arbre de parsing
+     */
+    public void printParseTree() {
+        System.out.println("--- Parse Tree ---");
+        printTree(parseTreeRoot, "", true);
+        System.out.println("--- End of Parse Tree ---\n\n");
+    }
+
+    /**
+     * Mostra l'arbre de parsing (intern)
+     *
+     * @param node   Node
+     * @param prefix Prefix
+     * @param isLast Si és l'últim node
+     */
     private void printTree(TreeNode node, String prefix, boolean isLast) {
         System.out.print(prefix);
         System.out.print(isLast ? "└── " : "├── ");
@@ -123,10 +166,18 @@ public class Parser {
         }
     }
 
+    /**
+     * Obté l'arbre de parsing
+     *
+     * @return Arbre de parsing
+     */
     public TreeNode getParseTreeRoot() {
         return parseTreeRoot;
     }
 
+    /**
+     * Mostra el stack (debug)
+     */
     private void printStack(Stack<Token> stack) {
         System.out.print("Stack: [");
         boolean first = true;

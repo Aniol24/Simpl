@@ -1,4 +1,11 @@
 fn main:
-    int -> x = 1 + 2
+    int -> x = 6
+    int -> y = 9
+    int -> z
+
+    if(x < y & !(y == 10) & x == 6):
+        z = 20
+    else:
+        z = 30
 
     return

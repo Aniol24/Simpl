@@ -4,41 +4,82 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Scope {
+    /**
+     * Símbols de la taula de símbols
+     */
     private Map<String, Symbol> symbols;
+    /**
+     * Scope pare
+     */
     private Scope parent;
+    /**
+     * Nom del scope
+     */
     private String scopeName;
 
+    /**
+     * Constructor de la classe Scope
+     */
     public Scope(String name, Scope parent) {
         this.scopeName = name;
         this.parent = parent;
         this.symbols = new HashMap<>();
     }
 
+    /**
+     * Funció per declarar un nou símbol
+     * @param symbol Símbol a declarar
+     * @return true si el símbol s'ha declarat correctament, false si ja existeix
+     */
     public boolean declareSymbol(Symbol symbol) {
         if (symbols.containsKey(symbol.getName())) {
-            return false; // Símbolo ya declarado
+            return false; // Símbol ja declarat
         }
         symbols.put(symbol.getName(), symbol);
         return true;
     }
 
+    /**
+     * Funció per a buscar un símbol
+     * @param name Nom del símbol a buscar
+     * @return Símbol si existeix, null si no existeix
+     */
     public Symbol lookupSymbol(String name) {
-
         Symbol symbol = symbols.get(name);
 
         if (symbol != null) {
             return symbol;
         }
 
-        // Comprueba si el símbolo está en el parent scope
+        // Comprova si el símbol existeix en un scope pare
         if (parent != null) {
             return parent.lookupSymbol(name);
         }
 
-        return null; // Symbol no encontrado
+        return null; // Símbol no trobat
     }
 
-    public Scope getParent() { return parent; }
-    public String getScopeName() { return scopeName; }
-    public Map<String, Symbol> getSymbols() { return symbols; }
+    /**
+     * Retorna el scope pare
+     * @return Scope pare
+     */
+    public Scope getParent() {
+        return parent;
+    }
+
+    /**
+     * Retorna el nom del scope
+     * @return Nom del scope
+     */
+    public String getScopeName() {
+        return scopeName;
+    }
+
+    /**
+     * Retorna els símbols del scope
+     * @return Mapa de símbols
+     */
+    public Map<String, Symbol> getSymbols() {
+        return symbols;
+    }
 }

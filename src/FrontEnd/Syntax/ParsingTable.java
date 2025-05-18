@@ -8,13 +8,22 @@ import java.util.*;
 
 public class ParsingTable {
 
+    /**
+     * Classe que representa una regla de la gramática
+     */
     static class Rule {
         String name;
         List<List<String>> tokens;
     }
 
+    /**
+     * La taula de parsing
+     */
     public Map<String, Map<String, List<String>>> parsingTable;
 
+    /**
+     * Constructor de la classe ParsingTable
+     */
     public ParsingTable() {
         parsingTable = new HashMap<>();
         try {
@@ -23,9 +32,15 @@ public class ParsingTable {
             System.out.println("Error: " + e.getMessage());
             System.exit(1);
         }
-        printTable(parsingTable);
+
+        //printTable(parsingTable); // Debug
     }
 
+    /**
+     * Crea la taula de parsing a partir de la gramàtica i les funcions FIRST i FOLLOW
+     *
+     * @throws Exception si hi ha un error llegint els fitxers
+     */
     public void createTable() throws Exception {
         try {
             Gson gson = new Gson();
@@ -54,10 +69,17 @@ public class ParsingTable {
                 }
             }
         } catch (FileNotFoundException e) {
-            throw new Exception("Fichero de grámatica o FIRST/FOLLOW no encontrado: " + e.getMessage());
+            throw new Exception("Grammar and/or First & Follow files not found: " + e.getMessage());
         }
     }
 
+    /**
+     * Computa el conjunt FIRST d'una producció
+     *
+     * @param sequence la producció
+     * @param firstMap el mapa FIRST
+     * @return el conjunt FIRST
+     */
     private static Set<String> computeFirst(List<String> sequence, JsonObject firstMap) {
         Set<String> result = new HashSet<>();
         boolean allNullable = true;
@@ -92,10 +114,23 @@ public class ParsingTable {
         return result;
     }
 
+    /**
+     * Insereix una producció a la taula de parsing
+     *
+     * @param table       la taula de parsing
+     * @param nonTerminal el no terminal
+     * @param terminal    el terminal
+     * @param production  la producció
+     */
     private static void insert(Map<String, Map<String, List<String>>> table, String nonTerminal, String terminal, List<String> production) {
         table.computeIfAbsent(nonTerminal, k -> new HashMap<>()).put(terminal, new ArrayList<>(production));
     }
 
+    /**
+     * Imprimeix la taula de parsing
+     *
+     * @param table la taula de parsing
+     */
     public static void printTable(Map<String, Map<String, List<String>>> table) {
         for (String nonTerm : table.keySet()) {
             System.out.println("NonTerminal: " + nonTerm);
@@ -105,6 +140,11 @@ public class ParsingTable {
         }
     }
 
+    /**
+     * Retorna la taula de parsing
+     *
+     * @return the parsing table
+     */
     public Map<String, Map<String, List<String>>> getParsingTable() {
         return parsingTable;
     }
