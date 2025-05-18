@@ -1,11 +1,7 @@
-Result: test Arg1:  Arg2:  Op: label
-Result: n Arg1: param1 Arg2:  Op: =
-Result: t0 Arg1: n Arg2: 1 Op: SUM
-Result:  Arg1: t0 Arg2:  Op: return
 Result: main Arg1:  Arg2:  Op: label
-Result:  Arg1: 2 Arg2:  Op: param
-Result: t1 Arg1: test Arg2:  Op: call
-Result: x Arg1: t1 Arg2:  Op: =
-Result: y Arg1: 2 Arg2:  Op: =
-Result: z Arg1: 'a' Arg2:  Op: =
+Result: hola Arg1: 1.5 Arg2:  Op: =
+Result: adios Arg1: 2.5 Arg2:  Op: =
+Result: resultado Arg1: 0.0 Arg2:  Op: =
+Result: t0 Arg1: hola Arg2: adios Op: SUM
+Result: resultado Arg1: t0 Arg2:  Op: =
 Result:  Arg1:  Arg2:  Op: return

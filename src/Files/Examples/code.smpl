@@ -1,9 +1,17 @@
 fn test(int -> n) -> int:
+    if (n <= 0):
+        int -> x = 1
+        x = x + 3 * 2
+        return x
 
-    return n + 1
+    if (n > 1):
+        int -> x = 2
+        x = x + 2 * 4
+        return x
+
+    return 0
 
 fn main:
-    int -> x = test(2)
-    flt -> y = 2
-    chr -> z = 'a'
+    int -> a = test(2)
+    flt -> b = 2.0 + 4 * 3.5
     return
