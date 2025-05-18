@@ -6,23 +6,49 @@
   <component name="ChangeListManager">
     <list default="true" id="fbbbd8ae-7293-4b43-8831-c3f2ac8ba4c7" name="Changes" comment="MIPS">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/Examples/SemanticTest.smpl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/Examples/SemanticTest2.smpl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/Examples/test.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/test.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/00_VarDeclaration.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/00_VarDeclaration.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/01_IfStatement.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/01_IfStatement.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/02_ForLoop.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/02_ForLoop.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/03_WhileLoop.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/03_WhileLoop.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/04_UntilLoop.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/04_UntilLoop.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/05_ParamFn.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/05_ParamFn.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/06_ElifStatement.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/06_ElifStatement.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/07_ElseStatement.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/07_ElseStatement.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/08_CharVar.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/08_CharVar.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/09_FloatVar.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/09_FloatVar.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/10_ArithmeticOperation.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/10_ArithmeticOperation.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/11_ComparisonOperators" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/11_ComparisonOperators" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/12_LogicalOperators.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/12_LogicalOperators.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/13_FnCallCondition.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/13_FnCallCondition.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/14_ModOperation.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/14_ModOperation.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/15_IncrementOperator.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/15_IncrementOperator.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/16_MultiLineComment.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/16_MultiLineComment.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/17_IntReturn.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/17_IntReturn.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/18_NestedIfs.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/18_NestedIfs.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/19_MultipleParamsFn.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/19_MultipleParamsFn.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/20_CharComparison.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/20_CharComparison.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/21_FloatArithmetic.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/21_FloatArithmetic.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/22_NestedLoops.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/22_NestedLoops.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/23_ComplexConditional.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/23_ComplexConditional.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/24_SingleLineComment.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/24_SingleLineComment.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/25_EmptyFn.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/25_EmptyFn.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/SemanticFail1.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/SemanticFail1.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/SemanticFail2.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/SemanticFail2.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/SemanticFail3.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/SemanticFail3.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/SemanticFail4.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/SemanticFail4.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/SemanticFail5.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/SemanticFail5.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/SemanticFail6.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/SemanticFail6.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/code.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/code.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/fibonacci.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/fibonacci.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/fibonacciV2.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/fibonacciV2.smpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Files/Examples/test.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Codes/test.smpl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Lexicon/Scanner.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Lexicon/Token.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Lexicon/Token.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Preprocessor/Preprocessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Preprocessor/Preprocessor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/FrontEnd/Semantics/SemanticAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Semantics/SemanticAnalyzer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Syntax/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Syntax/Parser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrontEnd/Syntax/ParsingTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/Syntax/ParsingTable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/FrontEnd/TAC/TACCodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/TAC/TACCodeGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Global/Errors/Error.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/Errors/Error.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Global/Errors/ErrorHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/Errors/ErrorHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Global/SymbolTable/Scope.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/SymbolTable/Scope.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FrontEnd/TAC/TACInstruction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/TAC/TACInstruction.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Global/SymbolTable/Symbol.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/SymbolTable/Symbol.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Global/SymbolTable/SymbolTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Global/SymbolTable/SymbolTable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
     <list id="8c9ea878-fd46-43de-8820-7b850b3ceac5" name="Changes by javiernajera" comment="" />
@@ -76,30 +102,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Application.analitzadorGramatica.executor&quot;: &quot;Run&quot;,
-    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;testing&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Application.Main.executor": "Run",
+    "Application.analitzadorGramatica.executor": "Run",
+    "Downloaded.Files.Path.Enabled": "false",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "dev",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/Files/JSON" />

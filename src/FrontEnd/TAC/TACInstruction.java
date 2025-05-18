@@ -1,8 +1,19 @@
 package FrontEnd.TAC;
 
 public class TACInstruction {
+    /**
+     * L'operació TAC
+     */
     private final String op, arg1, arg2, result;
 
+    /**
+     * Constructor de la classe TACInstruction
+     *
+     * @param op    Operació TAC
+     * @param arg1  Primer argument
+     * @param arg2  Segon argument
+     * @param result Resultat
+     */
     public TACInstruction(String op, String arg1, String arg2, String result) {
         this.op = op;
         this.arg1 = arg1;
@@ -57,6 +68,12 @@ public class TACInstruction {
         throw new RuntimeException("Operación desconocida en TACInstruction.toString(): " + op);
     }
 
+    /**
+     * Mapa d'operadors TAC
+     *
+     * @param op Operador a comprovar
+     * @return Operador TAC corresponent
+     */
     private String mapSymbol(String op) {
         switch (op) {
             // arithmetic
@@ -94,6 +111,9 @@ public class TACInstruction {
         }
     }
 
+    /**
+     * Getters
+     */
     public String getOp()    { return op;    }
     public String getArg1()  { return arg1;  }
     public String getArg2()  { return arg2;  }

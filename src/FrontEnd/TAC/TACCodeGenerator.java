@@ -37,7 +37,6 @@ public class TACCodeGenerator {
         PRECEDENCE.put("OR", 1);
     }
 
-
     public void generate() {
         TreeNode inicial = root.getChildren().get(0);
         TreeNode firstFunc = inicial.getChildren().get(0);
@@ -137,8 +136,6 @@ public class TACCodeGenerator {
             if (retVar == null) retVar = "0";
             emit("return", retVar, null, null);
         }
-
-        //emit("label", null, null, "end_" + fnName);
     }
 
     private void processCode(TreeNode node) {
@@ -151,25 +148,25 @@ public class TACCodeGenerator {
     }
 
     private void generateFor(TreeNode forLoopNode) {
-        // 1) Inicialización: int -> i = 0
+        // 1) Inicialització: int -> i = 0
         TreeNode initDecl = forLoopNode.getChildren().get(2);
         generateDeclaration(initDecl);
 
-        // 2) Etiqueta de inicio de condición
+        // 2) Etiqueta d'inici de condició
         String startLbl = newLabel();
         emit("label", null, null, startLbl);
 
-        // 3) Condición: i < 10
+        // 3) Condició
         TreeNode condNode = forLoopNode.getChildren().get(4);
         String condTemp  = generateEvalExpr(condNode);
         String endLbl    = newLabel();
         emit("ifFalse", condTemp, null, endLbl);
 
-        // 4) Cuerpo del for
+        // 4) Cos del for
         TreeNode codeNode = forLoopNode.getChildren().get(10);
         processCode(codeNode);
 
-        // 5) Incremento: i++ (o i--, o i = i + k)
+        // 5) Increment: i++ (o i--, o i = i + k)
         TreeNode idNode         = forLoopNode.getChildren().get(6);
         TreeNode assignmentNode = forLoopNode.getChildren().get(7);
         String   varName        = idNode.getAttribute();
@@ -189,42 +186,38 @@ public class TACCodeGenerator {
                 break;
             }
             case "EQ": {
-                // Para un for del tipo i = i + k
+                // Per a un for del tipus i = i + k
                 TreeNode exprNode = assignmentNode.getChildren().get(1);
                 String rhs = generateExpr(exprNode);
                 emit("=", rhs, null, varName);
                 break;
             }
             default:
-                System.err.println("generateFor: tipo de incremento no soportado: " + kind);
+                System.err.println("Increase type not supported on For Loop: " + kind);
         }
 
-        // 6) Vuelve a la condición
+        // 6) Torna a la condició
         emit("goto", null, null, startLbl);
 
-        // 7) Etiqueta de salida
+        // 7) Etiqueta de sortida
         emit("label", null, null, endLbl);
     }
 
     private void generateUntil(TreeNode untilNode) {
-        // 1) Etiqueta de comienzo del bucle
+        // 1) Etiqueta d'inici del bucle
         String startLbl = newLabel();
         emit("label", null, null, startLbl);
 
-        // 2) Cuerpo: el bloque CODE está en child[2]
+        // 2) Cos: el bloc CODE està a child[2]
         TreeNode codeNode = untilNode.getChildren().get(2);
         processCode(codeNode);
 
-        // 3) Condición: el nodo EVAL está en child[6]
+        // 3) Condició: el node EVAL està a child[6]
         TreeNode evalNode = untilNode.getChildren().get(6);
         String condTemp = generateEvalExpr(evalNode);
 
-        // 4) Si la condición es falsa, repetir: ifFalse condTemp goto startLbl
+        // 4) Si la condició és falsa, repetir: ifFalse condTemp goto startLbl
         emit("ifFalse", condTemp, null, startLbl);
-
-        // (Opcional) podrías emitir una etiqueta de salida, pero no es estrictamente necesaria:
-        // String endLbl = newLabel();
-        // emit("label", null, null, endLbl);
     }
 
     private void generateInstruction(TreeNode inst) {
@@ -242,9 +235,9 @@ public class TACCodeGenerator {
                 if ("WHILE_LOOP".equals(loopTypeNode.getValue())) {
                     generateWhile(loopTypeNode);
                 } else if ("FOR_LOOP".equals(loopTypeNode.getValue())) {
-                    generateFor(loopTypeNode); // TODO: Implement if needed
+                    generateFor(loopTypeNode);
                 } else if ("UNTIL_LOOP".equals(loopTypeNode.getValue())) {
-                    generateUntil(loopTypeNode); // TODO: Implement if needed
+                    generateUntil(loopTypeNode);
                 }
                 break;
             case "ID": {
@@ -266,7 +259,7 @@ public class TACCodeGenerator {
                     TreeNode evalNode = optEval.getChildren().get(0);
                     generateReturn(evalNode);
                 } else {
-                    emit("return", null, null, null); // Return without value
+                    emit("return", null, null, null); // Return sense valor
                 }
                 break;
             }
@@ -322,7 +315,7 @@ public class TACCodeGenerator {
 
         emit("label", null, null, nextLabel);
 
-        // Handle ELIF blocks
+        // ELIF blocks
         TreeNode currentElif = elifBlocks;
         while (currentElif != null && !currentElif.getChildren().isEmpty() && !"EPSILON".equals(currentElif.getChildren().get(0).getValue())) {
             // ELIF_BLOCKS -> ELIF PO EVAL PT START CODE END ELIF_BLOCKS
@@ -337,10 +330,10 @@ public class TACCodeGenerator {
             emit("goto", null, null, endLabel);
 
             emit("label", null, null, nextElifOrElseLabel);
-            currentElif = currentElif.getChildren().get(7); // Next ELIF_BLOCKS
+            currentElif = currentElif.getChildren().get(7); // Següents ELIF_BLOCKS
         }
 
-        // Handle ELSE block
+        // ELSE block
         boolean hasElse = elseBlock != null
                 && !elseBlock.getChildren().isEmpty()
                 && !"EPSILON".equals(elseBlock.getChildren().get(0).getValue());
@@ -353,7 +346,6 @@ public class TACCodeGenerator {
         }
         emit("label", null, null, endLabel);
     }
-
 
     private String generateCondition(TreeNode eval) {
         if (eval == null) return "";
@@ -388,7 +380,7 @@ public class TACCodeGenerator {
             System.err.println("Error: Empty EVAL node in generateEvalExpr.");
             return newTemp();
         }
-        // 1) Collect the leading EXPR and all (op, EXPR) from EVAL_PRIME
+
         List<TreeNode> exprNodes = new ArrayList<>();
         List<String>    ops       = new ArrayList<>();
         exprNodes.add(evalNode.getChildren().get(0));
@@ -405,7 +397,6 @@ public class TACCodeGenerator {
                     : null;
         }
 
-        // 2) Shunting-yard: build postfix into outputQueue
         List<Object> outputQueue = new ArrayList<>();
         Deque<String> opStack    = new ArrayDeque<>();
         for (int i = 0; i < ops.size(); i++) {
@@ -422,7 +413,6 @@ public class TACCodeGenerator {
             outputQueue.add(opStack.pop());
         }
 
-        // 3) Evaluate postfix: push/pop temps
         Deque<String> evalStack = new ArrayDeque<>();
         for (Object token : outputQueue) {
             if (token instanceof TreeNode) {
@@ -459,11 +449,11 @@ public class TACCodeGenerator {
 
     private void emitParams(TreeNode argListNode) {
         if (argListNode == null || argListNode.getChildren().isEmpty() || "EPSILON".equals(argListNode.getChildren().get(0).getValue())) {
-            return; // No arguments
+            return; // No té arguments
         }
         // ARG_LIST -> EVAL NEXT_ARG
         TreeNode evalNode = argListNode.getChildren().get(0);
-        String place = generateEvalExpr(evalNode); // Arguments are expressions
+        String place = generateEvalExpr(evalNode);
         emit("param", place, null, null);
 
         if (argListNode.getChildren().size() > 1) {
@@ -474,10 +464,10 @@ public class TACCodeGenerator {
 
     private void emitNextParams(TreeNode nextArgNode) {
         if (nextArgNode == null || nextArgNode.getChildren().isEmpty() || "EPSILON".equals(nextArgNode.getChildren().get(0).getValue())) {
-            return; // No more arguments
+            return;
         }
         // NEXT_ARG -> COMA EVAL NEXT_ARG
-        TreeNode evalNode = nextArgNode.getChildren().get(1); // After COMA
+        TreeNode evalNode = nextArgNode.getChildren().get(1);
         String place = generateEvalExpr(evalNode);
         emit("param", place, null, null);
 
@@ -503,7 +493,7 @@ public class TACCodeGenerator {
     private void generateAssignment(TreeNode inst) {
         String varName = inst.getChildren().get(0).getAttribute(); // ID
         TreeNode instructionPrimeNode = inst.getChildren().get(1);
-        TreeNode assignmentNode = instructionPrimeNode.getChildren().get(0); // ASSIGNMENT
+        TreeNode assignmentNode = instructionPrimeNode.getChildren().get(0);
 
         if (assignmentNode.getChildren().isEmpty()) return;
         String kind = assignmentNode.getChildren().get(0).getValue(); // EQ, INC, DEC
@@ -528,7 +518,6 @@ public class TACCodeGenerator {
                 emit("=", temp, null, varName);
                 break;
             }
-            // Handle POW if necessary
             default:
                 System.err.println("Unhandled assignment kind: " + kind);
                 break;
@@ -542,7 +531,7 @@ public class TACCodeGenerator {
         // FUNCTION_CALL -> PO ARG_LIST PT
         TreeNode argListNode = funcCallNode.getChildren().get(1);
         emitParams(argListNode);
-        emit("call", fnName, null, null); // No result captured directly for standalone calls
+        emit("call", fnName, null, null);
     }
 
     private void generateReturn(TreeNode evalNode) {
@@ -587,7 +576,7 @@ public class TACCodeGenerator {
     private String generateFactor(TreeNode factorNode) {
         if (factorNode == null || factorNode.getChildren().isEmpty()) {
             System.err.println("Error: Empty FACTOR node in generateFactor.");
-            return newTemp(); // Return a dummy temp
+            return newTemp();
         }
 
         TreeNode firstChild = factorNode.getChildren().get(0);
@@ -595,7 +584,7 @@ public class TACCodeGenerator {
 
         switch (kind) {
             case "PO": // FACTOR -> PO EVAL PT
-                TreeNode evalNode = factorNode.getChildren().get(1); // EVAL is the second child
+                TreeNode evalNode = factorNode.getChildren().get(1);
                 return generateEvalExpr(evalNode);
 
             case "ID": // FACTOR -> ID FACTOR_PRIME
@@ -610,15 +599,15 @@ public class TACCodeGenerator {
                     TreeNode argListNode = funcCallNode.getChildren().get(1);
                     emitParams(argListNode);
                     String temp = newTemp();
-                    emit("call", idName, null, temp); // idName is the function name
+                    emit("call", idName, null, temp);
                     return temp;
                 } else {
-                    // FACTOR_PRIME -> EPSILON, so it's just an ID
+                    // FACTOR_PRIME -> EPSILON
                     return idName;
                 }
 
             case "LITERAL": // FACTOR -> LITERAL
-                TreeNode literalNode = firstChild.getChildren().get(0); // e.g., INTEGER_LITERAL
+                TreeNode literalNode = firstChild.getChildren().get(0);
                 String literalValue = literalNode.getAttribute();
                 if ("CHAR_LITERAL".equals(literalNode.getValue())) {
                     return "'" + literalValue + "'";
@@ -626,15 +615,15 @@ public class TACCodeGenerator {
                 return literalValue; // For INTEGER_LITERAL, FLOAT_LITERAL
 
             case "NOT": // FACTOR -> NOT FACTOR
-                TreeNode operandFactorNode = factorNode.getChildren().get(1); // The FACTOR after NOT
+                TreeNode operandFactorNode = factorNode.getChildren().get(1);
                 String operandPlace = generateFactor(operandFactorNode);
                 String tempNot = newTemp();
-                emit("NOT", operandPlace, null, tempNot); // Assumes TAC op "NOT"
+                emit("NOT", operandPlace, null, tempNot);
                 return tempNot;
 
             default:
                 System.err.println("Unhandled factor kind: " + kind + " in CodeGenerator.generateFactor");
-                return newTemp(); // Return a dummy temp
+                return newTemp();
         }
     }
 

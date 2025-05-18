@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 public class Main {
 
-    private static final String FILE_PATH = "src/Files/Examples/fibonacciV2.smpl";
+    private static final String FILE_PATH = "src/Files/Codes/fibonacci.smpl";
 
     public static void main(String[] args) {
 
@@ -56,7 +56,7 @@ public class Main {
 
         // Generem MIPS
         MIPSCodeGenerator mipsCodeGenerator = new MIPSCodeGenerator(tacCodeGenerator.getCode(), symbolTable);
-        mipsCodeGenerator.setCommentTAC(true); // Mostrem les instruccions TAC al codi MIPS com a comentaris
+        mipsCodeGenerator.setCommentTAC(false); // Per a mostrar les instruccions TAC al codi MIPS com a comentaris
         mipsCodeGenerator.generate();
     }
 }

@@ -1,6 +1,5 @@
 package Global.SymbolTable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Symbol {

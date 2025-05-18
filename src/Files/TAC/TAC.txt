@@ -1,29 +1,27 @@
-Result: fibonacci_tail Arg1:  Arg2:  Op: label
+Result: fibonacci Arg1:  Arg2:  Op: label
 Result: n Arg1: param1 Arg2:  Op: =
-Result: a Arg1: param2 Arg2:  Op: =
-Result: b Arg1: param3 Arg2:  Op: =
-Result: t0 Arg1: n Arg2: 0 Op: ==
+Result: t0 Arg1: n Arg2: 0 Op: <=
 Result: L0 Arg1: t0 Arg2:  Op: ifFalse
-Result:  Arg1: a Arg2:  Op: return
+Result:  Arg1: 0 Arg2:  Op: return
 Result: L1 Arg1:  Arg2:  Op: goto
 Result: L0 Arg1:  Arg2:  Op: label
 Result: L1 Arg1:  Arg2:  Op: label
-Result: t1 Arg1: n Arg2: 1 Op: SUB
-Result:  Arg1: t1 Arg2:  Op: param
-Result:  Arg1: b Arg2:  Op: param
-Result: t2 Arg1: a Arg2: b Op: SUM
+Result: t1 Arg1: n Arg2: 1 Op: ==
+Result: L2 Arg1: t1 Arg2:  Op: ifFalse
+Result:  Arg1: 1 Arg2:  Op: return
+Result: L3 Arg1:  Arg2:  Op: goto
+Result: L2 Arg1:  Arg2:  Op: label
+Result: L3 Arg1:  Arg2:  Op: label
+Result: t2 Arg1: n Arg2: 1 Op: SUB
 Result:  Arg1: t2 Arg2:  Op: param
-Result: t3 Arg1: fibonacci_tail Arg2:  Op: call
-Result:  Arg1: t3 Arg2:  Op: return
-Result: fibonacci Arg1:  Arg2:  Op: label
-Result: n Arg1: param1 Arg2:  Op: =
-Result:  Arg1: n Arg2:  Op: param
-Result:  Arg1: 0 Arg2:  Op: param
-Result:  Arg1: 1 Arg2:  Op: param
-Result: t4 Arg1: fibonacci_tail Arg2:  Op: call
-Result:  Arg1: t4 Arg2:  Op: return
+Result: t3 Arg1: fibonacci Arg2:  Op: call
+Result: t4 Arg1: n Arg2: 2 Op: SUB
+Result:  Arg1: t4 Arg2:  Op: param
+Result: t5 Arg1: fibonacci Arg2:  Op: call
+Result: t6 Arg1: t3 Arg2: t5 Op: SUM
+Result:  Arg1: t6 Arg2:  Op: return
 Result: main Arg1:  Arg2:  Op: label
 Result:  Arg1: 11 Arg2:  Op: param
-Result: t5 Arg1: fibonacci Arg2:  Op: call
-Result: x Arg1: t5 Arg2:  Op: =
+Result: t7 Arg1: fibonacci Arg2:  Op: call
+Result: x Arg1: t7 Arg2:  Op: =
 Result:  Arg1:  Arg2:  Op: return
