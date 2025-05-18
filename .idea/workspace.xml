@@ -8,13 +8,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/BackEnd/MIPSCodeGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/Examples/code.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/code.smpl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/Examples/test.smpl" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/Examples/test.smpl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/JSON/first_and_follow.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/JSON/first_and_follow.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Files/JSON/terminals_and_nonterminals.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/JSON/terminals_and_nonterminals.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Files/TAC/TAC.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrontEnd/TAC/TACCodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/TAC/TACCodeGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrontEnd/TAC/TACInstruction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrontEnd/TAC/TACInstruction.java" afterDir="false" />
     </list>
     <list id="8c9ea878-fd46-43de-8820-7b850b3ceac5" name="Changes by javiernajera" comment="" />
     <option name="SHOW_DIALOG" value="false" />

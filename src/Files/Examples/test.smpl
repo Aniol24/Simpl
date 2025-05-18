@@ -1,8 +1,4 @@
 fn main:
-    int -> x = 5
-    int -> y = 10
-
-    if(x < y & y == 10 & x == 6):
-        y = 20
+    int -> x = 1 + 2
 
     return

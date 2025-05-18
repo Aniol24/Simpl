@@ -20,8 +20,8 @@ public class MIPSCodeGenerator {
     private int frameSize;
     private int paramCount;
 
-    private List<TACInstruction> TACCode;
-    private SymbolTable symbolTable;
+    private final List<TACInstruction> TACCode;
+    private final SymbolTable symbolTable;
 
     public MIPSCodeGenerator( List<TACInstruction> TACCode, SymbolTable symbolTable) {
         this.TACCode = TACCode;
@@ -50,7 +50,7 @@ public class MIPSCodeGenerator {
         File dir = new File("out");
         if (!dir.exists()) dir.mkdirs();
         try {
-            out = new PrintWriter(new File(dir, "program.asm"));
+            out = new PrintWriter(new File(dir, "program.s"));
 
             emitData();
             emitText(funcs);
@@ -154,21 +154,7 @@ public class MIPSCodeGenerator {
     }
 
     private void emitInstruction(TACInstruction ins) {
-
-        String opKey = ins.getOp();
-        switch (opKey) {
-            case "<":   opKey = "LOWER";          break;
-            case ">":   opKey = "GREATER";        break;
-            case "<=":  opKey = "LOWER_EQUAL";    break;
-            case ">=":  opKey = "GREATER_EQUAL";  break;
-            case "==":  opKey = "EQUALS";         break;
-            case "!=":  opKey = "NOT_EQUAL";      break;
-            case "&&":  opKey = "AND";            break;
-            case "||":  opKey = "OR";             break;
-            default:    /* leave opKey as is */   break;
-        }
-
-        String op  = opKey;
+        String op  = ins.getOp();
         String a1  = ins.getArg1();
         String a2  = ins.getArg2();
         String res = ins.getResult();
@@ -238,7 +224,6 @@ public class MIPSCodeGenerator {
                 }
                 break;
 
-
             case "SUM":
             case "SUB":
             case "MULT":
@@ -307,10 +292,10 @@ public class MIPSCodeGenerator {
 
             case "AND":
                 loadOperandToGPR(a1, "$t0");
-                out.println("\tsne  $t0, $t0, $zero");    // $t0 = (a1 != 0)
+                out.println("\tsne  $t0, $t0, $zero"); // $t0 = (a1 != 0)
                 loadOperandToGPR(a2, "$t1");
-                out.println("\tsne  $t1, $t1, $zero");    // $t1 = (a2 != 0)
-                out.println("\tand  $t2, $t0, $t1");      // $t2 = $t0 && $t1
+                out.println("\tsne  $t1, $t1, $zero"); // $t1 = (a2 != 0)
+                out.println("\tand  $t2, $t0, $t1");
                 storeGPRResult(res, "$t2");
                 break;
 
@@ -384,17 +369,6 @@ public class MIPSCodeGenerator {
                 }
                 out.println("\tj   " + currentFunction + "_exit");
                 out.println("\tnop");
-                break;
-
-
-
-            case "OR":
-                loadOperandToGPR(a1, "$t0");
-                out.println("\tsne  $t0, $t0, $zero");    // $t0 = (a1 != 0)
-                loadOperandToGPR(a2, "$t1");
-                out.println("\tsne  $t1, $t1, $zero");    // $t1 = (a2 != 0)
-                out.println("\tor   $t2, $t0, $t1");      // $t2 = $t0 || $t1
-                storeGPRResult(res, "$t2");
                 break;
 
             default:
@@ -666,114 +640,7 @@ public class MIPSCodeGenerator {
                 }
             } catch (NumberFormatException e) { /* Not a valid "paramN" format, ignore */ }
         }
-        
-        // 5. Fallback: If it's not a literal, not in varTypeMap, not in symbol table,
-        //    and not a resolvable "paramN", it's likely an undefined variable or an
-        //    issue with TAC generation (e.g., temporary used before definition).
-        //    Defaulting to "int" for robustness, but this might hide errors.
-        //    Consider adding a warning here if such cases are not expected.
+
         return "int"; 
-    }
-
-    private void loadTo(String var) {
-        if (var == null) {
-            out.println("\t# loadTo: var is null");
-            out.println("\tli   $t0, 0"); // Load 0 for null var to avoid crash
-            return;
-        }
-
-        if (var.matches("param\\d+")) {
-            int idx = Integer.parseInt(var.substring(5)) - 1;
-            if (idx >= 0 && idx < 4) { // Assuming up to 4 params in registers
-                out.printf("\tmove $t0, $a%d\n", idx);
-            } else {
-                out.printf("\t# loadTo: Accessing stacked parameter %s (not fully implemented)\n", var);
-                out.printf("\tlw $t0, %d($fp) # Placeholder for stacked param %s\n", (idx-4)*4 , var);
-            }
-        } else if (var.matches("^-?\\d+$")) { // Integer literal
-            out.printf("\tli   $t0, %s\n", var);
-        } else if (var.matches("^'.'$")) { // Char literal
-            out.printf("\tli   $t0, %d\n", (int)var.charAt(1));
-        } else if (floatConstants.containsKey(var)) { // Float literal (loading address then value)
-             String lbl = floatConstants.get(var);
-             out.printf("\tlwc1 $f0, %s\n", lbl); // Direct load from label if $f0 is target
-             out.printf("\t# loadTo: float literal %s to $t0 (integer part or address)\n", var);
-             out.printf("\tla $t0, %s # Load address of float\n", lbl);
-
-
-        } else { // Local variable or TAC temporary
-            Integer offset = localOffset.get(var);
-            if (offset == null) {
-                out.printf("\t# loadTo: Variable %s not found in localOffset, loading 0\n", var);
-                out.println("\tli   $t0, 0"); // Default to 0 if var not found
-            } else {
-                out.printf("\tlw   $t0, %d($fp)\n", offset);
-            }
-        }
-    }
-
-    private void loadToInto(String var, String reg) {
-        if (var == null) {
-            out.printf("\t# loadToInto: var is null for reg %s\n", reg);
-            out.printf("\tli   %s, 0\n", reg);
-            return;
-        }
-         if (var.matches("param\\d+")) {
-            int idx = Integer.parseInt(var.substring(5)) - 1;
-             if (idx >= 0 && idx < 4) {
-                out.printf("\tmove %s, $a%d\n", reg, idx);
-            } else {
-                out.printf("\t# loadToInto: Accessing stacked parameter %s into %s (not fully implemented)\n", var, reg);
-                out.printf("\tlw %s, %d($fp) # Placeholder for stacked param %s\n", reg, (idx-4)*4, var);
-            }
-        } else if (var.matches("^-?\\d+$")) {
-            out.printf("\tli   %s, %s\n", reg, var);
-        } else if (var.matches("^'.'$")) {
-            out.printf("\tli   %s, %d\n", reg, (int)var.charAt(1));
-        } else if (floatConstants.containsKey(var)) {
-            // Similar to loadTo, this is tricky for general purpose registers
-            out.printf("\t# loadToInto: float literal %s to %s (integer part or address)\n", var, reg);
-            String lbl = floatConstants.get(var);
-            out.printf("\tla %s, %s # Load address of float\n", reg, lbl);
-        }
-        else {
-            Integer offset = localOffset.get(var);
-            if (offset == null) {
-                out.printf("\t# loadToInto: Variable %s not found in localOffset, loading 0 into %s\n", var, reg);
-                out.printf("\tli   %s, 0\n", reg);
-            } else {
-                out.printf("\tlw   %s, %d($fp)\n", reg, offset);
-            }
-        }
-    }
-
-    private void storeLocal(String var) { // Assumes value to store is in $t0
-        Integer offset = localOffset.get(var);
-        if (offset == null) {
-            out.printf("\t# storeLocal: Variable %s not found in localOffset. Store ignored.\n", var);
-        } else {
-            // Check type for sw vs swc1
-            String type = varType.get(var);
-            if ("float".equals(type)) {
-                // Value should be in $f0 if it was a float operation result
-                out.printf("\tswc1 $f0, %d($fp) # Assuming value in $f0 for float\n", offset);
-            } else {
-                out.printf("\tsw   $t0, %d($fp)\n", offset);
-            }
-        }
-    }
-
-    private void storeLocalTo(String var, String reg) { // Value to store is in 'reg'
-         Integer offset = localOffset.get(var);
-        if (offset == null) {
-            out.printf("\t# storeLocalTo: Variable %s not found in localOffset. Store from %s ignored.\n", var, reg);
-        } else {
-            String type = varType.get(var);
-             if ("float".equals(type)) {
-                out.printf("\tswc1 %s, %d($fp) # Assuming %s is an FPU register for float type\n", reg, offset, reg);
-            } else {
-                out.printf("\tsw   %s, %d($fp)\n", reg, offset);
-            }
-        }
     }
 }

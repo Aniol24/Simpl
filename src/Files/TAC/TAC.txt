@@ -1,14 +1,4 @@
 Result: main Arg1:  Arg2:  Op: label
-Result: x Arg1: 5 Arg2:  Op: =
-Result: y Arg1: 10 Arg2:  Op: =
-Result: t0 Arg1: x Arg2: y Op: <
-Result: t1 Arg1: y Arg2: 10 Op: ==
-Result: t2 Arg1: t0 Arg2: t1 Op: &&
-Result: t3 Arg1: x Arg2: 6 Op: ==
-Result: t4 Arg1: t2 Arg2: t3 Op: &&
-Result: L0 Arg1: t4 Arg2:  Op: ifFalse
-Result: y Arg1: 20 Arg2:  Op: =
-Result: L1 Arg1:  Arg2:  Op: goto
-Result: L0 Arg1:  Arg2:  Op: label
-Result: L1 Arg1:  Arg2:  Op: label
+Result: t0 Arg1: 1 Arg2: 2 Op: SUM
+Result: x Arg1: t0 Arg2:  Op: =
 Result:  Arg1:  Arg2:  Op: return
