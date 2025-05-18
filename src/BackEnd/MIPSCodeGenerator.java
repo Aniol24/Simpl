@@ -50,7 +50,7 @@ public class MIPSCodeGenerator {
         File dir = new File("out");
         if (!dir.exists()) dir.mkdirs();
         try {
-            out = new PrintWriter(new File(dir, "program.s"));
+            out = new PrintWriter(new File(dir, "program.asm"));
 
             emitData();
             emitText(funcs);
@@ -154,7 +154,21 @@ public class MIPSCodeGenerator {
     }
 
     private void emitInstruction(TACInstruction ins) {
-        String op  = ins.getOp();
+
+        String opKey = ins.getOp();
+        switch (opKey) {
+            case "<":   opKey = "LOWER";          break;
+            case ">":   opKey = "GREATER";        break;
+            case "<=":  opKey = "LOWER_EQUAL";    break;
+            case ">=":  opKey = "GREATER_EQUAL";  break;
+            case "==":  opKey = "EQUALS";         break;
+            case "!=":  opKey = "NOT_EQUAL";      break;
+            case "&&":  opKey = "AND";            break;
+            case "||":  opKey = "OR";             break;
+            default:    /* leave opKey as is */   break;
+        }
+
+        String op  = opKey;
         String a1  = ins.getArg1();
         String a2  = ins.getArg2();
         String res = ins.getResult();
@@ -224,6 +238,7 @@ public class MIPSCodeGenerator {
                 }
                 break;
 
+
             case "SUM":
             case "SUB":
             case "MULT":
@@ -292,10 +307,10 @@ public class MIPSCodeGenerator {
 
             case "AND":
                 loadOperandToGPR(a1, "$t0");
-                out.println("\tsne  $t0, $t0, $zero"); // $t0 = (a1 != 0)
+                out.println("\tsne  $t0, $t0, $zero");    // $t0 = (a1 != 0)
                 loadOperandToGPR(a2, "$t1");
-                out.println("\tsne  $t1, $t1, $zero"); // $t1 = (a2 != 0)
-                out.println("\tand  $t2, $t0, $t1");
+                out.println("\tsne  $t1, $t1, $zero");    // $t1 = (a2 != 0)
+                out.println("\tand  $t2, $t0, $t1");      // $t2 = $t0 && $t1
                 storeGPRResult(res, "$t2");
                 break;
 
@@ -369,6 +384,17 @@ public class MIPSCodeGenerator {
                 }
                 out.println("\tj   " + currentFunction + "_exit");
                 out.println("\tnop");
+                break;
+
+
+
+            case "OR":
+                loadOperandToGPR(a1, "$t0");
+                out.println("\tsne  $t0, $t0, $zero");    // $t0 = (a1 != 0)
+                loadOperandToGPR(a2, "$t1");
+                out.println("\tsne  $t1, $t1, $zero");    // $t1 = (a2 != 0)
+                out.println("\tor   $t2, $t0, $t1");      // $t2 = $t0 || $t1
+                storeGPRResult(res, "$t2");
                 break;
 
             default:

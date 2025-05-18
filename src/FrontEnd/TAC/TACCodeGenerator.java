@@ -7,6 +7,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Deque;
+import java.util.ArrayDeque;
+import java.util.Map;
+import java.util.HashMap;
 
 public class TACCodeGenerator {
     private int tempCount = 0;
@@ -19,6 +23,20 @@ public class TACCodeGenerator {
     public TACCodeGenerator(TreeNode root) {
         this.root = root;
     }
+
+    // Operator precedences: relational/equality > boolean
+    private static final Map<String,Integer> PRECEDENCE = new HashMap<>();
+    static {
+        PRECEDENCE.put("LOWER", 2);
+        PRECEDENCE.put("LOWER_EQUAL", 2);
+        PRECEDENCE.put("GREATER", 2);
+        PRECEDENCE.put("GREATER_EQUAL", 2);
+        PRECEDENCE.put("EQUALS", 2);
+        PRECEDENCE.put("NOT_EQUAL", 2);
+        PRECEDENCE.put("AND", 1);
+        PRECEDENCE.put("OR", 1);
+    }
+
 
     public void generate() {
         TreeNode inicial = root.getChildren().get(0);
@@ -257,6 +275,8 @@ public class TACCodeGenerator {
         }
     }
 
+
+
     private void generateWhile(TreeNode whileLoopNode) {
         String startLbl = newLabel();
         String endLbl = newLabel();
@@ -308,18 +328,18 @@ public class TACCodeGenerator {
             // ELIF_BLOCKS -> ELIF PO EVAL PT START CODE END ELIF_BLOCKS
             TreeNode elifEvalNode = currentElif.getChildren().get(2);
             String elifCondTemp = generateEvalExpr(elifEvalNode);
-            
+
             String nextElifOrElseLabel = newLabel();
             emit("ifFalse", elifCondTemp, null, nextElifOrElseLabel);
-            
+
             TreeNode elifCodeNode = currentElif.getChildren().get(5);
             processCode(elifCodeNode);
             emit("goto", null, null, endLabel);
-            
+
             emit("label", null, null, nextElifOrElseLabel);
             currentElif = currentElif.getChildren().get(7); // Next ELIF_BLOCKS
         }
-        
+
         // Handle ELSE block
         boolean hasElse = elseBlock != null
                 && !elseBlock.getChildren().isEmpty()
@@ -366,29 +386,76 @@ public class TACCodeGenerator {
     private String generateEvalExpr(TreeNode evalNode) {
         if (evalNode == null || evalNode.getChildren().isEmpty()) {
             System.err.println("Error: Empty EVAL node in generateEvalExpr.");
-            return newTemp(); // Return a dummy temp to avoid further errors
+            return newTemp();
         }
-        // EVAL -> EXPR EVAL_PRIME
-        TreeNode exprNode = evalNode.getChildren().get(0);
-        String currentPlace = generateExpr(exprNode);
-
-        TreeNode evalPrimeNode = evalNode.getChildren().size() > 1 ? evalNode.getChildren().get(1) : null;
-
-        while (evalPrimeNode != null && !evalPrimeNode.getChildren().isEmpty() &&
-               !"EPSILON".equals(evalPrimeNode.getChildren().get(0).getValue())) {
-            // EVAL_PRIME -> OP EXPR EVAL_PRIME'
-            String op = evalPrimeNode.getChildren().get(0).getValue();
-            TreeNode nextExprNode = evalPrimeNode.getChildren().get(1);
-            String rightPlace = generateExpr(nextExprNode);
-
-            String temp = newTemp();
-            emit(op, currentPlace, rightPlace, temp);
-            currentPlace = temp;
-
-            evalPrimeNode = evalPrimeNode.getChildren().size() > 2 ? evalPrimeNode.getChildren().get(2) : null;
+        // 1) Collect the leading EXPR and all (op, EXPR) from EVAL_PRIME
+        List<TreeNode> exprNodes = new ArrayList<>();
+        List<String>    ops       = new ArrayList<>();
+        exprNodes.add(evalNode.getChildren().get(0));
+        TreeNode ep = evalNode.getChildren().size() > 1
+                ? evalNode.getChildren().get(1)
+                : null;
+        while (ep != null
+                && !ep.getChildren().isEmpty()
+                && !"EPSILON".equals(ep.getChildren().get(0).getValue())) {
+            ops.add(ep.getChildren().get(0).getValue());
+            exprNodes.add(ep.getChildren().get(1));
+            ep = ep.getChildren().size() > 2
+                    ? ep.getChildren().get(2)
+                    : null;
         }
-        return currentPlace;
+
+        // 2) Shunting-yard: build postfix into outputQueue
+        List<Object> outputQueue = new ArrayList<>();
+        Deque<String> opStack    = new ArrayDeque<>();
+        for (int i = 0; i < ops.size(); i++) {
+            outputQueue.add(exprNodes.get(i));
+            String op = ops.get(i);
+            while (!opStack.isEmpty()
+                    && PRECEDENCE.get(opStack.peek()) >= PRECEDENCE.get(op)) {
+                outputQueue.add(opStack.pop());
+            }
+            opStack.push(op);
+        }
+        outputQueue.add(exprNodes.get(ops.size()));
+        while (!opStack.isEmpty()) {
+            outputQueue.add(opStack.pop());
+        }
+
+        // 3) Evaluate postfix: push/pop temps
+        Deque<String> evalStack = new ArrayDeque<>();
+        for (Object token : outputQueue) {
+            if (token instanceof TreeNode) {
+                String val = generateExpr((TreeNode) token);
+                evalStack.push(val);
+            } else {
+                String sym   = (String) token;
+                String right = evalStack.pop();
+                String left  = evalStack.pop();
+                String tacOp = mapBooleanOp(sym);
+                String tmp   = newTemp();
+                emit(tacOp, left, right, tmp);
+                evalStack.push(tmp);
+            }
+        }
+        return evalStack.pop();
     }
+
+    private String mapBooleanOp(String tok) {
+        switch (tok) {
+            case "AND":         return "&&";
+            case "OR":          return "||";
+            case "EQUALS":      return "==";
+            case "NOT_EQUAL":   return "!=";
+            case "LOWER":       return "<";
+            case "LOWER_EQUAL": return "<=";
+            case "GREATER":     return ">";
+            case "GREATER_EQUAL":return ">=";
+            default:
+                throw new RuntimeException("Unknown operator: " + tok);
+        }
+    }
+
 
     private void emitParams(TreeNode argListNode) {
         if (argListNode == null || argListNode.getChildren().isEmpty() || "EPSILON".equals(argListNode.getChildren().get(0).getValue())) {

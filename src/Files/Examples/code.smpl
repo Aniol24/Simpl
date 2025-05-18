@@ -1,17 +1,8 @@
-fn test(int -> n) -> int:
-    if (n <= 0):
-        int -> x = 1
-        x = x + 3 * 2
-        return x
-
-    if (n > 1):
-        int -> x = 2
-        x = x + 2 * 4
-        return x
-
-    return 0
-
 fn main:
-    int -> a = test(2)
-    flt -> b = 2.0 + 4 * 3.5
+
+    flt -> hola = 1.7
+    flt -> adios = 2.2
+    flt -> resultado
+    resultado = hola * adios
+
     return

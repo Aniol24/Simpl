@@ -30,7 +30,7 @@ public class TACInstruction {
         }
         // 5) Call with return
         if ("call".equals(op)) {
-            if (result == null || result.isEmpty()) { // Check if result is effectively null or empty
+            if (result == null || result.isEmpty()) {
                 return "call " + arg1;
             } else {
                 return result + " = call " + arg1;
@@ -38,59 +38,64 @@ public class TACInstruction {
         }
         // 6) Return
         if ("return".equals(op)) {
-            return (arg1 != null ? "return " + arg1 : "return"); // Handle return with no value
+            return (arg1 != null && !arg1.isEmpty()) ? "return " + arg1 : "return";
         }
         // 7) Simple assignment
         if ("=".equals(op)) {
             return result + " = " + arg1;
         }
-        // 8) Unary operations
+        // 8) Unary NOT
         if ("NOT".equals(op)) {
             return result + " = NOT " + arg1;
         }
-        // 9) Binary operations and comparisons
+        // 9) Binary ops/comparisons
         String sym = mapSymbol(op);
         if (sym != null) {
             return result + " = " + arg1 + " " + sym + " " + arg2;
         }
-        // 10) Error si queda algo sin mapear
-        System.err.println("Operación desconocida en TACInstruction.toString(): " + op); // Log error
-        return String.format("%s = %s %s %s (Unknown OP: %s)", result, arg1, op, arg2, op); // Fallback representation
+        // 10) Fallback
+        throw new RuntimeException("Operación desconocida en TACInstruction.toString(): " + op);
     }
 
     private String mapSymbol(String op) {
         switch (op) {
-            case "SUM": return "+";
-            case "SUB": return "-";
-            case "MULT": return "*";
-            case "DIV": return "/";
-            case "MOD": return "%"; // Added MOD
-            case "EQ": // Fallthrough
-            case "EQUALS": return "=="; // Using == for clarity, adjust if TAC interpreter expects "EQUALS"
-            case "NOT_EQUAL": return "!=";
-            case "LOWER": return "<";
-            case "GREATER": return ">";
-            case "LOWER_EQUAL": return "<=";
-            case "GREATER_EQUAL": return ">=";
-            case "AND": return "&&"; // Common symbols for logical ops
-            case "OR": return "||";
-            default: return null;
+            // arithmetic
+            case "SUM":       return "+";
+            case "SUB":       return "-";
+            case "MULT":      return "*";
+            case "DIV":       return "/";
+            case "MOD":       return "%";
+
+            // equality
+            case "EQ":
+            case "EQUALS":
+            case "==":        return "==";
+            case "NOT_EQUAL":
+            case "!=":        return "!=";
+
+            // relational
+            case "LOWER":
+            case "<":         return "<";
+            case "LOWER_EQUAL":
+            case "<=":        return "<=";
+            case "GREATER":
+            case ">":         return ">";
+            case "GREATER_EQUAL":
+            case ">=":        return ">=";
+
+            // boolean
+            case "AND":
+            case "&&":        return "&&";
+            case "OR":
+            case "||":        return "||";
+
+            default:
+                return null;
         }
     }
 
-    public String getOp() {
-        return op;
-    }
-
-    public String getArg1() {
-        return arg1;
-    }
-
-    public String getArg2() {
-        return arg2;
-    }
-
-    public String getResult() {
-        return result;
-    }
+    public String getOp()    { return op;    }
+    public String getArg1()  { return arg1;  }
+    public String getArg2()  { return arg2;  }
+    public String getResult(){ return result;}
 }
