@@ -14,7 +14,7 @@ public class CodeGenerator {
     private final List<TACInstruction> code = new ArrayList<>();
     private final List<String[]> quads = new ArrayList<>();
 
-    public List<TACInstruction> generate(TreeNode root) throws IOException {
+    public List<TACInstruction> generate(TreeNode root) {
         TreeNode inicial = root.getChildren().get(0);
         TreeNode firstFunc = inicial.getChildren().get(0);
         TreeNode funcsNode = inicial.getChildren().get(1);
@@ -587,6 +587,8 @@ public class CodeGenerator {
                 pw.printf("Result: %s Arg1: %s Arg2: %s Op: %s%n",
                         q[0], q[1], q[2], q[3]);
             }
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
         }
     }
 

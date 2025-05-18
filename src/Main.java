@@ -14,11 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-//        TODO: BOOLEAN logic goes left to right. When we have (x < y & y > 0) it should be ((x < y) & (y > 0)). Else it does (((x < y) & y) > 0).
-//        TODO: TAC just skips the "for"
-//        Path codePath = Paths.get("src/Files/Examples/02_ForLoop.smpl");
-//        TODO: Not implemented yet on TAC
-//        Path codePath = Paths.get("src/Files/Examples/04_UntilLoop.smpl");
+//        TODO: BOOLEAN logic goes left to right. When we have (x < y & y > 0) it should be ((x < y) & (y > 0)). Else it does (((x < y) & y) > 0)
 //        TODO: FIX SINCE (x < y & y > 0) isn't calculated correctly in the TAC
 //        Path codePath = Paths.get("src/Files/Examples/12_LogicalOperators.smpl");
 //        TODO: FIX TAC code generation since there's a semantic error which thinks that we have booleans(we decided they don't exist in our language)
@@ -32,7 +28,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        Path codePath = Paths.get("src/Files/Examples/code.smpl");
+        Path codePath = Paths.get("src/Files/Examples/fibonacci.smpl");
 
         ErrorHandler errorHandler = new ErrorHandler();
         SymbolTable symbolTable = new SymbolTable();
@@ -61,22 +57,13 @@ public class Main {
         }
 
         CodeGenerator gen = new CodeGenerator();
-        try {
-            List<TACInstruction> code = gen.generate(parser.getParseTreeRoot());
-            for (int i = 0; i < code.size(); i++) {
-                System.out.println(code.get(i).toString());
-            }
-
-            //Generate MIPS
-            MIPSCodeGenerator mipsCodeGenerator = new MIPSCodeGenerator();
-            mipsCodeGenerator.generate(code);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        List<TACInstruction> code = gen.generate(parser.getParseTreeRoot());
+        for (int i = 0; i < code.size(); i++) {
+            System.out.println(code.get(i).toString());
         }
 
-
+        //Generate MIPS
+        MIPSCodeGenerator mipsCodeGenerator = new MIPSCodeGenerator();
+        mipsCodeGenerator.generate(code);
     }
 }

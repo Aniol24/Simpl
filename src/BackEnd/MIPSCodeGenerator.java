@@ -15,7 +15,7 @@ public class MIPSCodeGenerator {
     private int frameSize;
     private int paramCount;
 
-    public void generate(List<TACInstruction> code) throws Exception {
+    public void generate(List<TACInstruction> code) {
         Map<String,List<TACInstruction>> funcs = groupByFunction(code);
 
         // Recolectar literales float
@@ -36,11 +36,15 @@ public class MIPSCodeGenerator {
         // Preparar fichero de salida
         File dir = new File("out");
         if (!dir.exists()) dir.mkdirs();
-        out = new PrintWriter(new File(dir, "program.s"));
+        try {
+            out = new PrintWriter(new File(dir, "program.s"));
 
-        emitData();
-        emitText(funcs);
-        out.close();
+            emitData();
+            emitText(funcs);
+            out.close();
+        } catch (Exception e) {
+            System.err.println("Error al escribir el fichero de salida: " + e.getMessage());
+        }
     }
 
     private Map<String,List<TACInstruction>> groupByFunction(List<TACInstruction> code) {
@@ -239,6 +243,13 @@ public class MIPSCodeGenerator {
                 loadTo(a1);
                 loadToInto(a2, "$t1");
                 out.println("\tslt  $t2, $t0, $t1");
+                storeLocalTo(res, "$t2");
+                break;
+            
+            case "LOWER_EQUAL":
+                loadTo(a1);
+                loadToInto(a2, "$t1");
+                out.println("\tsle  $t2, $t0, $t1");
                 storeLocalTo(res, "$t2");
                 break;
 

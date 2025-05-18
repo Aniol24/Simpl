@@ -1,0 +1,8 @@
+fn fibonacci (int -> n) -> int:
+    if (n <= 0):
+        return 1
+    return n + fibonacci(n - 1)
+
+fn main:
+    int -> result = fibonacci(5)
+    return

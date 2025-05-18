@@ -1,4 +1,29 @@
+Result: fibonacci Arg1:  Arg2:  Op: label
+Result: n Arg1: param1 Arg2:  Op: =
+Result: t0 Arg1: n Arg2: 0 Op: LOWER_EQUAL
+Result: L0 Arg1: t0 Arg2:  Op: ifFalse
+Result:  Arg1: 0 Arg2:  Op: return
+Result: L1 Arg1:  Arg2:  Op: goto
+Result: L0 Arg1:  Arg2:  Op: label
+Result: L1 Arg1:  Arg2:  Op: label
+Result: t1 Arg1: n Arg2: 1 Op: EQUALS
+Result: L2 Arg1: t1 Arg2:  Op: ifFalse
+Result:  Arg1: 1 Arg2:  Op: return
+Result: L3 Arg1:  Arg2:  Op: goto
+Result: L2 Arg1:  Arg2:  Op: label
+Result: L3 Arg1:  Arg2:  Op: label
+Result: t2 Arg1: n Arg2: 1 Op: SUB
+Result:  Arg1: t2 Arg2:  Op: param
+Result: t3 Arg1: fibonacci Arg2:  Op: call
+Result: t4 Arg1: n Arg2: 2 Op: SUB
+Result:  Arg1: t4 Arg2:  Op: param
+Result: t5 Arg1: fibonacci Arg2:  Op: call
+Result: t6 Arg1: t3 Arg2: t5 Op: SUM
+Result:  Arg1: t6 Arg2:  Op: return
+Result: end_fibonacci Arg1:  Arg2:  Op: label
 Result: main Arg1:  Arg2:  Op: label
-Result: x Arg1: 10 Arg2:  Op: =
+Result:  Arg1: 11 Arg2:  Op: param
+Result: t7 Arg1: fibonacci Arg2:  Op: call
+Result: n Arg1: t7 Arg2:  Op: =
 Result:  Arg1:  Arg2:  Op: return
 Result: end_main Arg1:  Arg2:  Op: label

@@ -824,7 +824,7 @@ public class SemanticAnalyzer {
         String nodeValue = firstChild.getValue();
 
         switch (nodeValue) {
-            case "LPAREN": // Factor -> LPAREN EVAL RPAREN
+            case "PO": // Factor -> PO EVAL PO
                 TreeNode evalNode = findNode(factorNode, "EVAL"); // EVAL is child of factorNode
                 if (evalNode == null) {
                     reportError(getLine(factorNode), "Malformed parenthesized expression: missing EVAL after '('.");

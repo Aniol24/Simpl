@@ -1,6 +1,6 @@
 fn main:
     int -> x = 5
     int -> y = 10
-    if (!x < y & y > 0):
+    if (!x < y & (y > 0)):
         x = 1
     return

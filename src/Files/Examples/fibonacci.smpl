@@ -8,6 +8,5 @@ fn fibonacci(int -> n) -> int:
     return fibonacci(n - 1) + fibonacci(n - 2)
 
 fn main:
-    int -> n = 4
-    fibonacci(n)
+    int -> n = fibonacci(11)
     return
